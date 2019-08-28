@@ -1,0 +1,27 @@
+{
+	"compilerOptions": {
+		"module": "es6",
+		"target": "es2018",
+		"outDir": "lib",
+		"lib": [
+			"dom",
+			"es2019"
+    ],
+    "jsx": "react",
+		"sourceMap": true,
+		"forceConsistentCasingInFileNames": true,
+		"noImplicitReturns": true,
+		"strict": true,
+		"noUnusedLocals": true,
+		"noImplicitAny": true,
+		"skipLibCheck": true,
+		"skipDefaultLibCheck": true,
+		"strictFunctionTypes": false,
+		"esModuleInterop": true,
+		"moduleResolution": "node",
+	},
+	"exclude": [
+		"node_modules",
+    "test",
+	]
+}
