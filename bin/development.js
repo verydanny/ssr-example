@@ -2,9 +2,7 @@ const express = require('express')
 const path = require('path')
 const webpack = require('webpack')
 const webpackMerge = require('webpack-merge')
-const {
-  webpackClientServerMiddleware
-} = require('webpack-server-client-middleware')
+const { webpackClientServerMiddleware } = require('webpack-universal-compiler')
 const { compose } = require('compose-middleware')
 
 const app = express()
@@ -25,10 +23,17 @@ const clientConfigMerged = webpackMerge(sharedConfig(env), clientConfig(env))
 const serverConfigMerged = webpackMerge(sharedConfig(env), serverConfig(env))
 
 function composeMiddlewares(req, res, next) {
-  const { bundle } = res.locals.universal
-  const middleware = compose(bundle.middleware)
+  if (res.locals.universal && res.locals.universal.bundle) {
+    // middleware is the name of my server entryPoint export
+    // aka ./src/server/serverEntry.ts
+    // middleware is an array of my middleware, including the react
+    // renderer. This allows for hot-swapping middleware
+    const { middleware } = res.locals.universal.bundle
 
-  return middleware(req, res, next)
+    return compose(middleware)(req, res, next)
+  }
+
+  return next()
 }
 
 app.use(
