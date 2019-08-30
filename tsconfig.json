@@ -1,11 +1,11 @@
 {
 	"compilerOptions": {
-		"module": "commonjs",
+		"module": "esnext",
 		"target": "es2018",
 		"outDir": "lib",
 		"lib": [
 			"dom",
-			"es2019"
+			"esnext"
 		],
     "jsx": "react",
 		"sourceMap": true,
