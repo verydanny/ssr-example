@@ -3,7 +3,7 @@ module.exports = env => {
 
   return {
     name: 'server',
-    entry: './src/server/render.tsx',
+    entry: './src/server/serverEntry.ts',
     target: 'node',
     output: {
       path,

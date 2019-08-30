@@ -1,7 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Request, Response, NextFunction } from 'express'
 
-export default (req: Request, res: Response, next: NextFunction) => {
-  console.log('LOGGED, MIDDLEWARE INIT')
-
+export const logger = (_req: Request, _res: Response, next: NextFunction) => {
+  console.log('Middleware, You bingor maximus')
   next()
 }

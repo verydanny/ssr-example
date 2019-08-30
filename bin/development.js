@@ -2,14 +2,14 @@ const express = require('express')
 const path = require('path')
 const webpack = require('webpack')
 const webpackMerge = require('webpack-merge')
-const webpackDevMiddleware = require('webpack-dev-middleware')
-const webpackHotMiddleware = require('webpack-hot-middleware')
 const {
-  webpackServerClientMiddleware,
-  clientServerCompiler
+  webpackClientServerMiddleware
 } = require('webpack-server-client-middleware')
+const { compose } = require('compose-middleware')
 
 const app = express()
+
+app.use('/', express.static('public', { maxAge: 0, etag: false }))
 
 const sharedConfig = require('../webpack/webpack.shared.config')
 const clientConfig = require('../webpack/webpack.client.config')
@@ -24,18 +24,21 @@ const env = {
 const clientConfigMerged = webpackMerge(sharedConfig(env), clientConfig(env))
 const serverConfigMerged = webpackMerge(sharedConfig(env), serverConfig(env))
 
-const combinedConfig = [
-  webpackMerge(sharedConfig(env), clientConfig(env)),
-  webpackMerge(sharedConfig(env), serverConfig(env))
-]
+function composeMiddlewares(req, res, next) {
+  const { bundle } = res.locals.universal
+  const middleware = compose(bundle.middleware)
 
-const clientDingus = clientServerCompiler()
+  return middleware(req, res, next)
+}
 
-// app.use(webpackServerClientMiddleware(webpack(clientConfigMerged), webpack(serverConfigMerged), {
-//   inMemory: true,
-//   bingus: true,
-// }))
+app.use(
+  webpackClientServerMiddleware(clientConfigMerged, serverConfigMerged, {
+    inMemoryFilesystem: true
+  })
+)
 
-// app.use(webpackHotServerMiddleware(compiler))
+app.use(composeMiddlewares)
 
-// app.listen(8080)
+app.get('*')
+
+app.listen('8080')
