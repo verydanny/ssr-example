@@ -142,6 +142,11 @@
   dependencies:
     source-map "^0.6.1"
 
+"@types/webpack-env@^1.14.0":
+  version "1.14.0"
+  resolved "https://registry.yarnpkg.com/@types/webpack-env/-/webpack-env-1.14.0.tgz#8edfc5f8e6eae20eeed3ca0d02974ed4ee5e4efc"
+  integrity sha512-Fv+0gYJzE/czLoRKq+gnXWr4yBpPM3tO3C8pDLFwqVKlMICQUq5OsxwwFZYDaVr7+L6mgNDp16iOcJHEz3J5RQ==
+
 "@types/webpack-merge@^4.1.5":
   version "4.1.5"
   resolved "https://registry.yarnpkg.com/@types/webpack-merge/-/webpack-merge-4.1.5.tgz#265fbee4810474860d0f4c17e0107032881eed47"
@@ -4597,10 +4602,10 @@ webpack-sources@^1.4.0, webpack-sources@^1.4.1:
     source-list-map "^2.0.0"
     source-map "~0.6.1"
 
-webpack-universal-compiler@^1.0.0-alpha.1:
-  version "1.0.0-alpha.1"
-  resolved "https://registry.yarnpkg.com/webpack-universal-compiler/-/webpack-universal-compiler-1.0.0-alpha.1.tgz#3f1e8b776bfdfbb99b34cdeee320c8987efd65f5"
-  integrity sha512-cQJ+wKfELgFO5fms5BEY0oKf8QOd8v0tpzNWi/Y/HqnDW2temktqrsWykmrjAQaNIRXOh/1Qdpn5XpT2icxXkQ==
+webpack-universal-compiler@^1.0.0-alpha.2:
+  version "1.0.0-alpha.2"
+  resolved "https://registry.yarnpkg.com/webpack-universal-compiler/-/webpack-universal-compiler-1.0.0-alpha.2.tgz#1b307cfc482f0f5d3430a003de7b921ee348bfcf"
+  integrity sha512-i7OL8ONE8LvLQG9U994fqBkAScZ7P4QrOIYVVuD6pE/vivilN954CueJCY2PPhGUSsxlLQ3j54mjaW8nSzo54g==
   dependencies:
     aggregate-error "^3.0.0"
     chalk "^2.4.2"
@@ -4619,6 +4624,7 @@ webpack-universal-compiler@^1.0.0-alpha.1:
     unionfs "^4.2.0"
     webpack "4.39.3"
     webpack-dev-middleware "^3.7.0"
+    webpack-hot-middleware "^2.25.0"
 
 webpack@4.39.3, webpack@^4.39.2:
   version "4.39.3"

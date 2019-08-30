@@ -2,6 +2,7 @@ const express = require('express')
 const path = require('path')
 const webpack = require('webpack')
 const webpackMerge = require('webpack-merge')
+const webpackHotMiddleware = require('webpack-hot-middleware')
 const { webpackClientServerMiddleware } = require('webpack-universal-compiler')
 const { compose } = require('compose-middleware')
 
@@ -29,16 +30,18 @@ function composeMiddlewares(req, res, next) {
     // middleware is an array of my middleware, including the react
     // renderer. This allows for hot-swapping middleware
     const { middleware } = res.locals.universal.bundle
+    const composedMiddleware = compose(middleware)
 
-    return compose(middleware)(req, res, next)
+    return composedMiddleware(req, res, next)
   }
 
-  return next()
+  next()
 }
 
 app.use(
   webpackClientServerMiddleware(clientConfigMerged, serverConfigMerged, {
-    inMemoryFilesystem: true
+    inMemoryFilesystem: true,
+    hot: true
   })
 )
 
