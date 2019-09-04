@@ -1,3 +1,5 @@
+const { resolve } = require('path')
+
 module.exports = env => {
   const { path } = env
 
@@ -9,6 +11,23 @@ module.exports = env => {
       path,
       filename: 'server.js',
       libraryTarget: 'commonjs2'
+    },
+    module: {
+      rules: [
+        {
+          // For CSS modules
+          test: /\.css$/i,
+          use: [
+            {
+              loader: 'css-loader',
+              options: {
+                modules: true,
+                onlyLocals: true
+              }
+            }
+          ]
+        }
+      ]
     }
   }
 }

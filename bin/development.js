@@ -1,8 +1,6 @@
 const express = require('express')
-const path = require('path')
-const webpack = require('webpack')
+const { resolve } = require('path')
 const webpackMerge = require('webpack-merge')
-const webpackHotMiddleware = require('webpack-hot-middleware')
 const { webpackClientServerMiddleware } = require('webpack-universal-compiler')
 const { compose } = require('compose-middleware')
 
@@ -17,7 +15,7 @@ const serverConfig = require('../webpack/webpack.server.config')
 const env = {
   mode: 'development',
   devtool: 'cheap-module-eval-source-map',
-  path: path.resolve(process.cwd(), 'dist')
+  path: resolve(process.cwd(), 'dist')
 }
 
 const clientConfigMerged = webpackMerge(sharedConfig(env), clientConfig(env))
@@ -30,23 +28,24 @@ function composeMiddlewares(req, res, next) {
     // middleware is an array of my middleware, including the react
     // renderer. This allows for hot-swapping middleware
     const { middleware } = res.locals.universal.bundle
-    const composedMiddleware = compose(middleware)
 
-    return composedMiddleware(req, res, next)
+    return compose(middleware)(req, res, next)
   }
 
-  next()
+  return next()
 }
 
-app.use(
-  webpackClientServerMiddleware(clientConfigMerged, serverConfigMerged, {
+const middleware = webpackClientServerMiddleware(
+  clientConfigMerged,
+  serverConfigMerged,
+  {
     inMemoryFilesystem: true,
     hot: true
-  })
+  }
 )
+
+app.use(middleware)
 
 app.use(composeMiddlewares)
 
-app.get('*')
-
-app.listen('8080')
+app.listen(8080)
