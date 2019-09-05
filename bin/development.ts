@@ -8,10 +8,6 @@ import { sharedConfig } from '../webpack/webpack.shared.config'
 import { clientConfig } from '../webpack/webpack.client.config'
 import { serverConfig } from '../webpack/webpack.server.config'
 
-const app = express()
-
-app.use('/', express.static('public', { maxAge: 0, etag: false }))
-
 const env = {
   mode: 'development',
   devtool: 'cheap-module-eval-source-map',
@@ -21,23 +17,9 @@ const env = {
 const clientConfigMerged = webpackMerge(sharedConfig(env), clientConfig(env))
 const serverConfigMerged = webpackMerge(sharedConfig(env), serverConfig(env))
 
-function composeMiddlewares(
-  req: express.Request,
-  res: express.Response,
-  next: express.NextFunction
-) {
-  if (res.locals.universal && res.locals.universal.bundle) {
-    // middleware is the name of my server entryPoint export
-    // aka ./src/server/serverEntry.ts
-    // middleware is an array of my middleware, including the react
-    // renderer. This allows for hot-swapping middleware
-    const { middleware } = res.locals.universal.bundle
+const app = express()
 
-    return compose(middleware)(req, res, next)
-  }
-
-  return next()
-}
+app.use('/', express.static('public', { maxAge: 0, etag: false }))
 
 const middleware = webpackClientServerMiddleware(
   clientConfigMerged,
@@ -50,6 +32,22 @@ const middleware = webpackClientServerMiddleware(
 
 app.use(middleware)
 
-app.use(composeMiddlewares)
+app.use(
+  (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    if (res.locals.universal && res.locals.universal.bundle) {
+      // middleware is the name of my server entryPoint export
+      // aka ./src/server/entry.ts
+      // middleware is an array of my middleware, including the react
+      // renderer. This allows for hot-swapping middleware
+      const { middleware } = res.locals.universal.bundle
 
-app.listen(8080)
+      return compose(middleware)(req, res, next)
+    }
+
+    return next()
+  }
+)
+
+app.listen(8080, () => {
+  console.log('Development server running on localhost:8080')
+})
