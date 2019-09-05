@@ -7,7 +7,7 @@ export const clientConfig = (env: WebpackConfig) => {
   const { path, mode } = env
   return {
     name: 'client',
-    entry: ['webpack-hot-middleware/client', './src/client/hydrate.tsx'],
+    entry: ['webpack-hot-middleware/client', './src/client/entry.tsx'],
     output: {
       path,
       filename: 'client.js',

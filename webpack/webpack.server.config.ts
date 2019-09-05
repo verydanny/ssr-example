@@ -5,7 +5,7 @@ export const serverConfig = (env: WebpackConfig) => {
 
   return {
     name: 'server',
-    entry: './src/server/serverEntry.ts',
+    entry: './src/server/entry.ts',
     target: 'node' as const,
     output: {
       path,

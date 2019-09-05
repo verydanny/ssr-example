@@ -2,6 +2,6 @@
 import { Request, Response, NextFunction } from 'express'
 
 export const logger = (_req: Request, _res: Response, next: NextFunction) => {
-  console.log('Open your mind Kaiba!')
+  console.log('Example of a simple logging middleware...')
   next()
 }
