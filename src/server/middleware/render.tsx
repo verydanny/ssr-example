@@ -17,7 +17,7 @@ export const serverRenderer = (
           <title>Apps</title>
           <link rel="stylesheet" href="/assets/client.css" >
         </head>
-        <h1>This is HTML middleware</h1>
+        <h1>Edit some middleware maybe</h1>
         <body>
           <div class="app-root">${renderToString(<App />)}</div>
           <script src="assets/client.js"></script>

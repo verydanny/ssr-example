@@ -1,14 +1,8 @@
 import React from 'react'
-import { asyncComponent } from '../../utils/async-component'
-
-const AsyncHelloWorld = asyncComponent(
-  () => import('../async-components/hello-world-async'),
-  'AsyncComponent'
-)
+import style from './style.css'
 
 export const HelloWorldTwo = () => (
   <div>
-    <h1>This is HelloWorldTwo, loading Async Component Below!</h1>
-    <AsyncHelloWorld name="Joe" />
+    <h1 className={style.bigH}>Hi there, I&apos;m an async component</h1>
   </div>
 )
