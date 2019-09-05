@@ -1,18 +1,16 @@
 import React from 'react'
 
-type CycleProps<Props> = {
-  readonly [x: string]: React.ComponentType<Props>
-}
+type MakePromise<T> = Promise<
+  {
+    [K in keyof T]: React.ComponentType<T[K]>
+  }
+>
 
-interface State<Props> {
-  component: null | React.ComponentType<Props>
-}
-
-export function asyncComponent<Props extends {}>(
-  importComponent: () => Promise<CycleProps<Props>>,
-  exportName: string
+export function asyncComponent<Props extends object, K extends keyof Props>(
+  importComponent: () => MakePromise<Props>,
+  exportName: K
 ) {
-  return class AsyncComponent extends React.Component<Props, State<Props>> {
+  return class AsyncComponent extends React.Component<Props[K], {}> {
     state = {
       component: null
     }
@@ -30,7 +28,7 @@ export function asyncComponent<Props extends {}>(
     render() {
       const C: any = this.state.component
 
-      return C ? <C {...(this.props as Props)} /> : <div>Loading...</div>
+      return C ? <C {...(this.props as Props[K])} /> : <div>Loading...</div>
     }
   }
 }

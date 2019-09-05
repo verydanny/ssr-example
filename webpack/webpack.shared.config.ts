@@ -1,6 +1,8 @@
-const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin')
+import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin'
 
-module.exports = env => {
+import { WebpackConfig } from '../types/webpack-config'
+
+export const sharedConfig = (env: WebpackConfig) => {
   const { mode, devtool } = env
 
   return {

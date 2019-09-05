@@ -1,16 +1,16 @@
-const { resolve } = require('path')
+import { WebpackConfig } from '../types/webpack-config'
 
-module.exports = env => {
+export const serverConfig = (env: WebpackConfig) => {
   const { path } = env
 
   return {
     name: 'server',
     entry: './src/server/serverEntry.ts',
-    target: 'node',
+    target: 'node' as const,
     output: {
       path,
       filename: 'server.js',
-      libraryTarget: 'commonjs2'
+      libraryTarget: 'commonjs2' as const
     },
     module: {
       rules: [

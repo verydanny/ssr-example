@@ -1,7 +1,9 @@
-const webpack = require('webpack')
-const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+import webpack from 'webpack'
+import MiniCssExtractPlugin from 'mini-css-extract-plugin'
 
-module.exports = env => {
+import { WebpackConfig } from '../types/webpack-config'
+
+export const clientConfig = (env: WebpackConfig) => {
   const { path, mode } = env
   return {
     name: 'client',
@@ -14,7 +16,7 @@ module.exports = env => {
       hotUpdateMainFilename: 'hot-update.json',
       hotUpdateChunkFilename: '[id].hot-update.js'
     },
-    target: 'web',
+    target: 'web' as const,
     plugins: [
       new webpack.HotModuleReplacementPlugin(),
       new MiniCssExtractPlugin({

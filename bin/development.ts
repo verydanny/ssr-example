@@ -1,27 +1,31 @@
-const express = require('express')
-const { resolve } = require('path')
-const webpackMerge = require('webpack-merge')
-const { webpackClientServerMiddleware } = require('webpack-universal-compiler')
-const { compose } = require('compose-middleware')
+import express from 'express'
+import { resolve } from 'path'
+import webpackMerge from 'webpack-merge'
+import { webpackClientServerMiddleware } from 'webpack-universal-compiler'
+import { compose } from 'compose-middleware'
+
+import { sharedConfig } from '../webpack/webpack.shared.config'
+import { clientConfig } from '../webpack/webpack.client.config'
+import { serverConfig } from '../webpack/webpack.server.config'
 
 const app = express()
 
 app.use('/', express.static('public', { maxAge: 0, etag: false }))
 
-const sharedConfig = require('../webpack/webpack.shared.config')
-const clientConfig = require('../webpack/webpack.client.config')
-const serverConfig = require('../webpack/webpack.server.config')
-
 const env = {
   mode: 'development',
   devtool: 'cheap-module-eval-source-map',
   path: resolve(process.cwd(), 'dist')
-}
+} as const
 
 const clientConfigMerged = webpackMerge(sharedConfig(env), clientConfig(env))
 const serverConfigMerged = webpackMerge(sharedConfig(env), serverConfig(env))
 
-function composeMiddlewares(req, res, next) {
+function composeMiddlewares(
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) {
   if (res.locals.universal && res.locals.universal.bundle) {
     // middleware is the name of my server entryPoint export
     // aka ./src/server/serverEntry.ts
