@@ -1,4 +1,5 @@
 import { WebpackConfig } from '../types/webpack-config'
+import { resolve } from 'path'
 
 export const serverConfig = (env: WebpackConfig) => {
   const { path } = env
@@ -8,8 +9,9 @@ export const serverConfig = (env: WebpackConfig) => {
     entry: './src/server/entry.ts',
     target: 'node' as const,
     output: {
-      path,
+      path: resolve(path, 'server/'),
       filename: 'server.js',
+      chunkFilename: '[id].js',
       libraryTarget: 'commonjs2' as const
     },
     module: {

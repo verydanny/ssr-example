@@ -39,12 +39,14 @@ app.use(
       // aka ./src/server/entry.ts
       // middleware is an array of my middleware, including the react
       // renderer. This allows for hot-swapping middleware
-      const { middleware } = res.locals.universal.bundle
+      const { middleware, preloadAll } = res.locals.universal.bundle
 
-      return compose(middleware)(req, res, next)
+      preloadAll().then(() => {
+        compose(middleware)(req, res, next)
+      })
     }
 
-    return next()
+    next()
   }
 )
 

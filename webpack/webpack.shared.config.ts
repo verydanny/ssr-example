@@ -23,13 +23,13 @@ export const sharedConfig = (env: WebpackConfig) => {
     },
     resolve: {
       extensions: ['.tsx', '.ts', '.js']
-    },
-    plugins: [
-      new ForkTsCheckerWebpackPlugin({
-        eslint: true,
-        formatter: 'codeframe',
-        useTypescriptIncrementalApi: true
-      })
-    ]
+    }
+    // plugins: [
+    //   new ForkTsCheckerWebpackPlugin({
+    //     eslint: true,
+    //     formatter: 'codeframe',
+    //     useTypescriptIncrementalApi: true
+    //   })
+    // ]
   }
 }

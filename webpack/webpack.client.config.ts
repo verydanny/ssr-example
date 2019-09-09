@@ -1,4 +1,5 @@
 import webpack from 'webpack'
+import { resolve } from 'path'
 import MiniCssExtractPlugin from 'mini-css-extract-plugin'
 
 import { WebpackConfig } from '../types/webpack-config'
@@ -7,9 +8,12 @@ export const clientConfig = (env: WebpackConfig) => {
   const { path, mode } = env
   return {
     name: 'client',
-    entry: ['webpack-hot-middleware/client', './src/client/entry.tsx'],
+    entry: [
+      'webpack-hot-middleware/client?reload=true&noInfo=true',
+      './src/client/entry.tsx'
+    ],
     output: {
-      path,
+      path: resolve(path, 'client/'),
       filename: 'client.js',
       publicPath: '/assets/',
       chunkFilename: '[id].js',

@@ -10,21 +10,22 @@ export const serverRenderer = (
   next: NextFunction
 ) => {
   if (req.method === 'GET' && req.path === '/') {
-    return res.status(200).send(`
+    res.status(200).send(`
       <!DOCTYPE html>
       <html>
         <head>
           <title>Apps</title>
-          <link rel="stylesheet" href="/assets/client.css" >
+          <link rel="stylesheet" href="/assets/client.css">
         </head>
         <h1>Edit some middleware maybe</h1>
         <body>
           <div class="app-root">${renderToString(<App />)}</div>
+          <script src="assets/HelloWorldTwo.js"></script>
           <script src="assets/client.js"></script>
         </body>
       </html>
     `)
   }
 
-  return next()
+  next()
 }
