@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/camelcase */
 import React from 'react'
+import { Consumer } from './async-context'
 
 type MakePromise<T> = Promise<
   {
@@ -71,7 +72,8 @@ const LoadingComp = () => <div>Loading...</div>
 export function asyncComponent<Props extends object, K extends keyof Props>(
   importComponent: () => MakePromise<Props>,
   exportName: K,
-  webpack: () => any
+  webpack: () => any,
+  chunkName: string
 ) {
   let res: LoadInterface
 
@@ -157,7 +159,24 @@ export function asyncComponent<Props extends object, K extends keyof Props>(
       if (this.state.loading) {
         return React.createElement(LoadingComp)
       } else if (this.state.loaded && typeof this.state.loaded === 'object') {
-        return React.createElement(this.state.loaded[exportName], this.props)
+        return (
+          <Consumer>
+            {({ updateChunk }) => {
+              if (typeof updateChunk === 'function') {
+                updateChunk(chunkName)
+              }
+
+              if (typeof this.state.loaded === 'object') {
+                return React.createElement(
+                  this.state.loaded[exportName],
+                  this.props
+                )
+              }
+
+              return null
+            }}
+          </Consumer>
+        )
       } else {
         return null
       }
