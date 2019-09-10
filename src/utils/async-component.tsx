@@ -59,8 +59,6 @@ function isWebpackReady(webpack: () => number) {
       typeof moduleId !== 'undefined' &&
       typeof __webpack_modules__[moduleId] !== 'undefined'
 
-    console.log(isReady)
-
     return isReady
   }
 
@@ -163,7 +161,7 @@ export function asyncComponent<Props extends object, K extends keyof Props>(
           <Consumer>
             {({ updateChunk }) => {
               if (typeof updateChunk === 'function') {
-                updateChunk(chunkName)
+                updateChunk(chunkName, webpack)
               }
 
               if (typeof this.state.loaded === 'object') {

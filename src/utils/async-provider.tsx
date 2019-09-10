@@ -2,7 +2,10 @@ import React from 'react'
 import { Provider } from './async-context'
 
 interface Props {
-  updateChunk: (chunkName: string | number | symbol) => void
+  updateChunk: (
+    chunkName: string | number | symbol,
+    webpack: () => string
+  ) => void
 }
 
 interface State {

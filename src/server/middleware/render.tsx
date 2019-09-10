@@ -3,6 +3,8 @@ import { renderToString } from 'react-dom/server'
 import App from '../../app/containers/app'
 import { AsyncChunkProvider } from '../../utils/async-provider'
 
+import { Stats } from 'webpack'
+
 import { Response, Request, NextFunction } from 'express'
 
 export const serverRenderer = (
@@ -11,7 +13,14 @@ export const serverRenderer = (
   next: NextFunction
 ) => {
   if (req.method === 'GET' && req.path === '/') {
-    const chunks: (string | number | symbol)[] = []
+    const oldChunks: (string | number | symbol)[] = []
+
+    const { clientStats } = res.locals.universal.compilation
+    const stats: Stats.ToJsonOutput = clientStats.toJson()
+    const { modules, chunks: Chunks } = stats
+    const chunkIds = new Set()
+    const chunkFiles = new Set()
+    const chunkNeeded = new Set()
 
     res.status(200).send(`
       <!DOCTYPE html>
@@ -24,18 +33,44 @@ export const serverRenderer = (
         <body>
           <div class="app-root">${renderToString(
             <AsyncChunkProvider
-              updateChunk={chunk => chunk && chunks.push(chunk)}
+              updateChunk={(chunk, webpack) => {
+                const moduleId = webpack()
+
+                if (modules) {
+                  for (const { name, chunks } of modules) {
+                    if (name === moduleId && chunks) {
+                      chunkIds.add(chunks)
+                    }
+                  }
+
+                  if (chunkIds && Chunks) {
+                    for (const { id, files } of Chunks) {
+                      if (
+                        Array.from(chunkIds)
+                          .flat()
+                          .includes(id) &&
+                        files
+                      ) {
+                        chunkFiles.add(files)
+                      }
+                    }
+                  }
+                }
+
+                oldChunks.push(chunk)
+              }}
             >
               <App />
             </AsyncChunkProvider>
           )}</div>
-          ${chunks
+          ${Array.from(chunkFiles)
+            .flat()
             .map(
-              chunk =>
-                `<script src="assets/${String(chunk)}.js" async></script>`
+              chunk => `<script src="assets/${String(chunk)}" async></script>`
             )
             .join('')}
-          <script src="assets/client.js"></script>
+          <script src="assets/client.js" async></script>
+          <script src="assets/vendors~main.js" async></script>
         </body>
       </html>
     `)

@@ -3,14 +3,14 @@ import { asyncComponent } from '../../utils/async-component'
 import style from './style.css'
 
 const SomeAsyncComponent = asyncComponent(
-  () => import(/* webpackChunkName: "foo-1" */ './foo-one'),
+  () => import('./foo-one'),
   'HelloWorldTwo',
   () => require.resolveWeak('./foo-one'),
   'foo-1'
 )
 
 const SomeOtherAsync = asyncComponent(
-  () => import(/* webpackChunkName: "foo-2" */ './foo-two'),
+  () => import('./foo-two'),
   'HelloWorldTwo',
   () => require.resolveWeak('./foo-two'),
   'foo-2'

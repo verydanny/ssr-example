@@ -1,13 +1,12 @@
-import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin'
+import webpack from 'webpack'
 
 import { WebpackConfig } from '../types/webpack-config'
 
 export const sharedConfig = (env: WebpackConfig) => {
-  const { mode, devtool } = env
+  const { mode } = env
 
   return {
     mode,
-    devtool,
     module: {
       rules: [
         {
@@ -21,15 +20,11 @@ export const sharedConfig = (env: WebpackConfig) => {
         }
       ]
     },
+    optimization: {
+      namedChunks: true
+    },
     resolve: {
       extensions: ['.tsx', '.ts', '.js']
     }
-    // plugins: [
-    //   new ForkTsCheckerWebpackPlugin({
-    //     eslint: true,
-    //     formatter: 'codeframe',
-    //     useTypescriptIncrementalApi: true
-    //   })
-    // ]
-  }
+  } as webpack.Configuration
 }
