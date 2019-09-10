@@ -3,6 +3,7 @@ import { resolve } from 'path'
 import webpackMerge from 'webpack-merge'
 import { webpackClientServerMiddleware } from 'webpack-universal-compiler'
 import { compose } from 'compose-middleware'
+import { transformStats } from './transform-stats'
 
 import { sharedConfig } from '../webpack/webpack.shared.config'
 import { clientConfig } from '../webpack/webpack.client.config'
@@ -44,6 +45,26 @@ app.use(
       preloadAll().then(() => {
         compose(middleware)(req, res, next)
       })
+    }
+
+    next()
+  }
+)
+
+app.use(
+  (
+    _req: express.Request,
+    res: express.Response,
+    next: express.NextFunction
+  ) => {
+    if (res.locals.universal && res.locals.universal.compilation) {
+      const { clientStats, serverStats } = res.locals.universal.compilation
+
+      const cStats = transformStats(clientStats.toJson())
+      const sStats = transformStats(serverStats.toJson())
+
+      res.locals.clientStats = JSON.parse(cStats)
+      res.locals.serverStats = JSON.parse(sStats)
     }
 
     next()

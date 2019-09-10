@@ -7,7 +7,9 @@
   "license": "MIT",
   "private": false,
   "scripts": {
-    "start": "ts-node -T --compiler-options '{\"module\":\"commonjs\"}' bin/development.ts",
+    "dev": "ts-node -T --compiler-options '{\"module\":\"commonjs\"}' bin/development.ts",
+    "prod": "ts-node -T --compiler-options '{\"module\":\"commonjs\"}' bin/production.ts",
+    "start": "ts-node -T --compiler-options '{\"module\":\"commonjs\"}' bin/start.ts",
     "webpack-defaults": "webpack-defaults"
   },
   "devDependencies": {
@@ -22,6 +24,7 @@
     "@typescript-eslint/eslint-plugin": "^2.2.0",
     "@typescript-eslint/parser": "^2.2.0",
     "css-loader": "^3.2.0",
+    "declaration-bundler-webpack-plugin": "^1.0.3",
     "eslint": "^6.3.0",
     "eslint-config-prettier": "^6.3.0",
     "eslint-plugin-prettier": "^3.1.0",

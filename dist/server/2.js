@@ -1,0 +1,2 @@
+exports.ids=[2],exports.modules={10:function(e,n,t){"use strict";t.r(n),t.d(n,"HelloWorldTwo",function(){return a});var s=t(0),o=t.n(s),r=t(1),l=t.n(r);const a=()=>o.a.createElement("div",null,o.a.createElement("h1",{className:l.a.bigH},"This is Async Component number 2"))}};
+//# sourceMappingURL=2.js.map

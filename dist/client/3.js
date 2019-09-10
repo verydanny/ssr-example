@@ -1,0 +1,2 @@
+(window.webpackJsonp=window.webpackJsonp||[]).push([[3],{12:function(n,e,o){"use strict";o.r(e),o.d(e,"HelloWorldTwo",function(){return i});var s=o(0),t=o.n(s),a=o(1),c=o.n(a);const i=()=>t.a.createElement("div",null,t.a.createElement("h1",{className:c.a.bigH},"This is Async Component number 2"))}}]);
+//# sourceMappingURL=3.js.map

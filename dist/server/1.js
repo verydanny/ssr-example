@@ -1,0 +1,2 @@
+exports.ids=[1],exports.modules={9:function(e,t,n){"use strict";n.r(t),n.d(t,"HelloWorldTwo",function(){return a});var o=n(0),r=n.n(o),s=n(1),l=n.n(s);const a=({on:e})=>r.a.createElement("div",null,r.a.createElement("h1",{className:l.a.bigH},"Hi there, I‘m some ",e,"dude"))}};
+//# sourceMappingURL=1.js.map

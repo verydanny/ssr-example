@@ -13,62 +13,87 @@ export const serverRenderer = (
   next: NextFunction
 ) => {
   if (req.method === 'GET' && req.path === '/') {
-    const oldChunks: (string | number | symbol)[] = []
+    const { modulesById, modulesByName } = res.locals.serverStats
+    const {
+      modulesById: clientModuleId,
+      modulesByName: clientModuleName,
+      entrypoints,
+      publicPath
+    } = res.locals.clientStats
+    const chunkJS: string[] = []
+    const chunkCSS: string[] = []
 
-    const { clientStats } = res.locals.universal.compilation
-    const stats: Stats.ToJsonOutput = clientStats.toJson()
-    const { modules, chunks: Chunks } = stats
-    const chunkIds = new Set()
-    const chunkFiles = new Set()
-    const chunkNeeded = new Set()
+    const getClientIdName = (id: string | number) => {
+      if (modulesById[id].name) {
+        const serverModuleName = modulesById[id].name
+
+        return clientModuleName[serverModuleName].id
+          ? clientModuleName[serverModuleName].id
+          : undefined
+      }
+
+      return undefined
+    }
+
+    const getClientCss = (id: number) => {
+      if (clientModuleId[id] && clientModuleId[id].chunkFiles) {
+        const chunks = clientModuleId[id].chunkFiles
+
+        return chunks.css
+      }
+    }
+
+    const getClientJs = (id: number) => {
+      if (clientModuleId[id] && clientModuleId[id].chunkFiles) {
+        const chunks = clientModuleId[id].chunkFiles
+
+        return chunks.js
+      }
+    }
+
+    const sortModules = (webpack: () => string | number) => {
+      const moduleId = webpack()
+
+      const normalizedId = getClientIdName(moduleId)
+
+      if (normalizedId) {
+        chunkJS.push(...getClientJs(normalizedId))
+        chunkCSS.push(...getClientCss(normalizedId))
+      }
+    }
 
     res.status(200).send(`
       <!DOCTYPE html>
       <html>
         <head>
           <title>Apps</title>
-          <link rel="stylesheet" href="/assets/client.css">
+          ${entrypoints.css
+            .map(
+              (chunk: string) =>
+                `<link href="${publicPath}${String(
+                  chunk
+                )}" rel="stylesheet"></script>`
+            )
+            .join('')}
         </head>
         <h1>Edit some middleware maybe</h1>
         <body>
           <div class="app-root">${renderToString(
-            <AsyncChunkProvider
-              updateChunk={webpack => {
-                const moduleId = webpack()
-
-                if (modules) {
-                  for (const { name, chunks } of modules) {
-                    if (name === moduleId && chunks) {
-                      chunkIds.add(chunks)
-                    }
-                  }
-
-                  if (chunkIds && Chunks) {
-                    for (const { id, files } of Chunks) {
-                      if (
-                        Array.from(chunkIds)
-                          .flat()
-                          .includes(id) &&
-                        files
-                      ) {
-                        chunkFiles.add(files)
-                      }
-                    }
-                  }
-                }
-              }}
-            >
+            <AsyncChunkProvider updateChunk={sortModules}>
               <App />
             </AsyncChunkProvider>
           )}</div>
-          ${Array.from(chunkFiles)
-            .flat()
+          ${Array.from(new Set(chunkJS))
             .map(
               chunk => `<script src="assets/${String(chunk)}" async></script>`
             )
             .join('')}
-          <script src="assets/client.js" async></script>
-          <script src="assets/vendors~main.js" async></script>
+          ${entrypoints.js
+            .map(
+              (chunk: string) =>
+                `<script src="${publicPath}${String(chunk)}" async></script>`
+            )
+            .join('')}
         </body>
       </html>
     `)

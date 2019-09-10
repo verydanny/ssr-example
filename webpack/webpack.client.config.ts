@@ -1,12 +1,10 @@
 import webpack from 'webpack'
 import { resolve } from 'path'
 import MiniCssExtractPlugin from 'mini-css-extract-plugin'
-// eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-// @ts-ignore
-import { StatsWriterPlugin } from 'webpack-stats-plugin'
 // import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer'
 
 import { WebpackConfig } from '../types/webpack-config'
+import { transformStats } from '../bin/transform-stats'
 
 export const clientConfig = (env: WebpackConfig) => {
   const { path, mode } = env
@@ -36,32 +34,6 @@ export const clientConfig = (env: WebpackConfig) => {
     },
     target: 'web' as const,
     plugins: [
-      // new StatsWriterPlugin({
-      //   fields: null,
-      //   stats: {
-      //     hash: true,
-      //     colors: false,
-      //     chunks: true,
-      //     chunkGroups: true,
-      //     chunkModules: true,
-      //     chunkOrigins: true,
-      //     entrypoints: true,
-      //     assets: true,
-      //     modules: true,
-      //     builtAt: false,
-      //     children: false,
-      //     cached: false,
-      //     errors: false,
-      //     errorDetails: false,
-      //     timings: false,
-      //     version: false,
-      //     warnings: false,
-      //     reasons: false,
-      //     publicPath: true,
-      //     performance: false,
-      //     moduleTrace: true
-      //   }
-      // }),
       new webpack.HotModuleReplacementPlugin(),
       new MiniCssExtractPlugin({
         // Options similar to the same options in webpackOptions.output
@@ -70,7 +42,7 @@ export const clientConfig = (env: WebpackConfig) => {
         chunkFilename: '[id].css',
         ignoreOrder: false // Enable to remove warnings about conflicting order
       })
-    ],
+    ].filter(Boolean),
     module: {
       rules: [
         {
