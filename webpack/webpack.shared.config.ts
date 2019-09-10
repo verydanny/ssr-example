@@ -26,10 +26,6 @@ export const sharedConfig = (env: WebpackConfig) => {
         }
       ]
     },
-    optimization: {
-      namedChunks: false,
-      namedModules: false
-    },
     plugins: [
       new CleanWebpackPlugin(),
       !_dev_ &&

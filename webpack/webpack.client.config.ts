@@ -4,7 +4,6 @@ import MiniCssExtractPlugin from 'mini-css-extract-plugin'
 // import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer'
 
 import { WebpackConfig } from '../types/webpack-config'
-import { transformStats } from '../bin/transform-stats'
 
 export const clientConfig = (env: WebpackConfig) => {
   const { path, mode } = env
@@ -22,7 +21,7 @@ export const clientConfig = (env: WebpackConfig) => {
       path: resolve(path, 'client/'),
       filename: 'client.js',
       publicPath: '/assets/',
-      chunkFilename: '[id].js',
+      chunkFilename: '[id].[hash:5].js',
       pathinfo: false,
       hotUpdateMainFilename: 'hot-update.json',
       hotUpdateChunkFilename: '[id].hot-update.js'

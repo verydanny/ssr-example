@@ -3,8 +3,6 @@ import { renderToString } from 'react-dom/server'
 import App from '../../app/containers/app'
 import { AsyncChunkProvider } from '../../utils/async-provider'
 
-import { Stats } from 'webpack'
-
 import { Response, Request, NextFunction } from 'express'
 
 export const serverRenderer = (
@@ -62,6 +60,12 @@ export const serverRenderer = (
       }
     }
 
+    const body = renderToString(
+      <AsyncChunkProvider updateChunk={sortModules}>
+        <App />
+      </AsyncChunkProvider>
+    )
+
     res.status(200).send(`
       <!DOCTYPE html>
       <html>
@@ -70,22 +74,22 @@ export const serverRenderer = (
           ${entrypoints.css
             .map(
               (chunk: string) =>
-                `<link href="${publicPath}${String(
-                  chunk
-                )}" rel="stylesheet"></script>`
+                `<link href="${publicPath}${String(chunk)}" rel="stylesheet">`
+            )
+            .join('')}
+          ${Array.from(new Set(chunkCSS))
+            .map(
+              chunk => `<link href="${publicPath}${chunk}" rel="stylesheet">`
             )
             .join('')}
         </head>
         <h1>Edit some middleware maybe</h1>
         <body>
-          <div class="app-root">${renderToString(
-            <AsyncChunkProvider updateChunk={sortModules}>
-              <App />
-            </AsyncChunkProvider>
-          )}</div>
+          <div class="app-root">${body}</div>
           ${Array.from(new Set(chunkJS))
             .map(
-              chunk => `<script src="${publicPath}${String(chunk)}" async></script>`
+              chunk =>
+                `<script src="${publicPath}${String(chunk)}" async></script>`
             )
             .join('')}
           ${entrypoints.js
