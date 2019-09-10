@@ -2,17 +2,10 @@ import React from 'react'
 import { Provider } from './async-context'
 
 interface Props {
-  updateChunk: (
-    chunkName: string | number | symbol,
-    webpack: () => string
-  ) => void
+  updateChunk: (webpack: () => string | number) => void
 }
 
-interface State {
-  updateChunk: (chunkName: string | number | symbol) => void
-}
-
-export class AsyncChunkProvider extends React.Component<Props, State> {
+export class AsyncChunkProvider extends React.Component<Props> {
   constructor(props: Props) {
     super(props)
   }

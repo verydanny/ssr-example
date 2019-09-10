@@ -9,7 +9,7 @@ import { StatsWriterPlugin } from 'webpack-stats-plugin'
 import { WebpackConfig } from '../types/webpack-config'
 
 export const clientConfig = (env: WebpackConfig) => {
-  const { path, mode, devtool } = env
+  const { path, mode } = env
   const _dev_ = mode === 'development'
 
   return {
@@ -60,9 +60,6 @@ export const clientConfig = (env: WebpackConfig) => {
       //     publicPath: true,
       //     performance: false,
       //     moduleTrace: true
-      //   },
-      //   transform(data: webpack.Stats, opts: any) {
-      //     console.log(data)
       //   }
       // }),
       new webpack.HotModuleReplacementPlugin(),

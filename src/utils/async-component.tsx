@@ -2,11 +2,17 @@
 import React from 'react'
 import { Consumer } from './async-context'
 
-type MakePromise<T> = Promise<
-  {
-    [K in keyof T]: React.ComponentType<T[K]>
-  }
->
+type GetProps<T> = T extends React.ComponentType<infer P> ? P : never
+
+type DefaultOrNamedExport =
+  | {
+      readonly [x: string]: any
+    }
+  | { readonly default: any }
+
+type ResolvedPromise<T extends DefaultOrNamedExport> = {
+  [K in keyof T]: React.ComponentType<T[K]>
+}
 
 interface LoadInterface {
   loading: boolean
@@ -21,14 +27,11 @@ interface HOCState<Props> {
   loaded: boolean | React.ComponentType<Props>
 }
 
-export const ALL_ASYNC: (() => Promise<any> | undefined)[] = []
-export const ALL_READY_ASYNC: (() => Promise<any> | undefined)[] = []
+const ALL_ASYNC: (() => Promise<any> | undefined)[] = []
+const ON_DEMAND_ASYNC: (() => Promise<any> | undefined)[] = []
 
-export const ALL_CHUNKS = []
-export const READY_CHUNKS = []
-
-function load(loader: () => Promise<any>) {
-  const promise = loader()
+function load<ImportFunc extends () => Promise<any>>(importFunc: ImportFunc) {
+  const importPromise = importFunc()
 
   const state: LoadInterface = {
     loading: true,
@@ -36,7 +39,7 @@ function load(loader: () => Promise<any>) {
     Promise: undefined
   }
 
-  state.Promise = promise
+  state.Promise = importPromise
     .then(loaded => {
       state.loading = false
       state.loaded = loaded
@@ -51,13 +54,13 @@ function load(loader: () => Promise<any>) {
   return state
 }
 
-function isWebpackReady(webpack: () => number) {
+function isWebpackReady(webpack: () => string | number) {
   if (typeof __webpack_modules__ === 'object') {
     const moduleId = webpack()
 
     const isReady =
       typeof moduleId !== 'undefined' &&
-      typeof __webpack_modules__[moduleId] !== 'undefined'
+      typeof __webpack_modules__[moduleId as any] !== 'undefined'
 
     return isReady
   }
@@ -67,11 +70,20 @@ function isWebpackReady(webpack: () => number) {
 
 const LoadingComp = () => <div>Loading...</div>
 
-export function asyncComponent<Props extends object, K extends keyof Props>(
-  importComponent: () => MakePromise<Props>,
-  exportName: K,
-  webpack: () => any,
-  chunkName: string
+/**
+ *
+ * @param importComponent - A function that returns a promise with the React.Component
+ * @param webpack - A function that returns the `webpack.resolveWeak(./someModule)` function
+ * @param exportName - If your import is not default, please specify the import name
+ */
+export function asyncComponent<
+  Exports extends object,
+  K extends keyof ResolvedPromise<Exports>,
+  Props = GetProps<Exports[K]>
+>(
+  importComponent: () => Promise<Exports>,
+  webpack: () => string | number,
+  exportName: K | 'default' = 'default'
 ) {
   let res: LoadInterface
 
@@ -83,10 +95,14 @@ export function asyncComponent<Props extends object, K extends keyof Props>(
     return res.Promise
   }
 
+  // This pushes all async component Promises to a variables. This is so
+  // server-side we resolve async components before they load.
   ALL_ASYNC.push(init)
 
+  // This pushes the chunks that are needed for current "view" to array.
+  // This is for client-side more than server-side
   if (typeof webpack === 'function') {
-    ALL_READY_ASYNC.push(() => {
+    ON_DEMAND_ASYNC.push(() => {
       if (isWebpackReady(webpack)) {
         return init()
       }
@@ -95,13 +111,10 @@ export function asyncComponent<Props extends object, K extends keyof Props>(
     })
   }
 
-  return class AsyncComponent extends React.Component<
-    Props[K],
-    HOCState<Props[K]>
-  > {
+  return class AsyncComponent extends React.Component<Props, HOCState<Props>> {
     _mounted = false
 
-    constructor(props: Props[K]) {
+    constructor(props: Props) {
       super(props)
       init()
 
@@ -161,7 +174,7 @@ export function asyncComponent<Props extends object, K extends keyof Props>(
           <Consumer>
             {({ updateChunk }) => {
               if (typeof updateChunk === 'function') {
-                updateChunk(chunkName, webpack)
+                updateChunk(webpack)
               }
 
               if (typeof this.state.loaded === 'object') {
@@ -212,5 +225,5 @@ export const preloadAll = () =>
 export const preloadReady = () =>
   new Promise(resolve => {
     // We always will resolve, errors should be handled within loading UIs.
-    flushInitializers(ALL_READY_ASYNC).then(resolve, resolve)
+    flushInitializers(ON_DEMAND_ASYNC).then(resolve, resolve)
   })

@@ -33,7 +33,7 @@ export const serverRenderer = (
         <body>
           <div class="app-root">${renderToString(
             <AsyncChunkProvider
-              updateChunk={(chunk, webpack) => {
+              updateChunk={webpack => {
                 const moduleId = webpack()
 
                 if (modules) {
@@ -56,8 +56,6 @@ export const serverRenderer = (
                     }
                   }
                 }
-
-                oldChunks.push(chunk)
               }}
             >
               <App />

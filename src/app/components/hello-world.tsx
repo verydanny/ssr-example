@@ -4,16 +4,14 @@ import style from './style.css'
 
 const SomeAsyncComponent = asyncComponent(
   () => import('./foo-one'),
-  'HelloWorldTwo',
   () => require.resolveWeak('./foo-one'),
-  'foo-1'
+  'HelloWorldTwo'
 )
 
 const SomeOtherAsync = asyncComponent(
   () => import('./foo-two'),
-  'HelloWorldTwo',
   () => require.resolveWeak('./foo-two'),
-  'foo-2'
+  'HelloWorldTwo'
 )
 
 export const HelloWorld = () => (
@@ -21,7 +19,7 @@ export const HelloWorld = () => (
     <div className={style.bigBlue}>
       Hello World, <strong>Component</strong>
     </div>
-    <SomeAsyncComponent />
+    <SomeAsyncComponent on={false} />
     <SomeOtherAsync />
   </div>
 )
