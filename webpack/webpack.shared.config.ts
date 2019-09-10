@@ -2,6 +2,7 @@ import webpack from 'webpack'
 // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
 // @ts-ignore
 import { StatsWriterPlugin } from 'webpack-stats-plugin'
+import { CleanWebpackPlugin } from 'clean-webpack-plugin'
 import { transformStats } from '../bin/transform-stats'
 
 import { WebpackConfig } from '../types/webpack-config'
@@ -30,6 +31,7 @@ export const sharedConfig = (env: WebpackConfig) => {
       namedModules: false
     },
     plugins: [
+      new CleanWebpackPlugin(),
       !_dev_ &&
         new StatsWriterPlugin({
           fields: null,

@@ -1,2 +1,0 @@
-(window.webpackJsonp=window.webpackJsonp||[]).push([[2],{11:function(e,n,o){"use strict";o.r(n),o.d(n,"HelloWorldTwo",function(){return s});var t=o(0),a=o.n(t),c=o(1),r=o.n(c);const s=({on:e})=>a.a.createElement("div",null,a.a.createElement("h1",{className:r.a.bigH},"Hi there, I‘m some ",e,"dude"))}}]);
-//# sourceMappingURL=2.js.map
