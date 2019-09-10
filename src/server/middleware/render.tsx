@@ -13,7 +13,7 @@ export const serverRenderer = (
   next: NextFunction
 ) => {
   if (req.method === 'GET' && req.path === '/') {
-    const { modulesById, modulesByName } = res.locals.serverStats
+    const { modulesById } = res.locals.serverStats
     const {
       modulesById: clientModuleId,
       modulesByName: clientModuleName,
@@ -85,7 +85,7 @@ export const serverRenderer = (
           )}</div>
           ${Array.from(new Set(chunkJS))
             .map(
-              chunk => `<script src="assets/${String(chunk)}" async></script>`
+              chunk => `<script src="${publicPath}${String(chunk)}" async></script>`
             )
             .join('')}
           ${entrypoints.js
