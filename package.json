@@ -8,9 +8,8 @@
   "private": false,
   "scripts": {
     "dev": "ts-node -T --compiler-options '{\"module\":\"commonjs\"}' bin/development.ts",
-    "prod": "node --trace-warnings  node_modules/.bin/ts-node -T --compiler-options '{\"module\":\"commonjs\"}' bin/production.ts",
-    "start": "ts-node -T --compiler-options '{\"module\":\"commonjs\"}' bin/start.ts",
-    "webpack-defaults": "webpack-defaults"
+    "prod": "ts-node -T --compiler-options '{\"module\":\"commonjs\"}' bin/production.ts",
+    "start": "ts-node -T --compiler-options '{\"module\":\"commonjs\"}' bin/start.ts"
   },
   "devDependencies": {
     "@types/compression-webpack-plugin": "^2.0.1",
@@ -39,10 +38,11 @@
     "style-loader": "^1.0.0",
     "ts-loader": "^6.0.4",
     "typescript": "3.5.3",
+    "webpack": "^4.39.3",
     "webpack-bundle-analyzer": "^3.4.1",
     "webpack-merge": "^4.2.2",
     "webpack-stats-plugin": "^0.3.0",
-    "webpack-universal-compiler": "^1.1.0"
+    "webpack-universal-compiler": "^1.2.0"
   },
   "dependencies": {
     "compose-middleware": "^5.0.1",
