@@ -75,7 +75,7 @@ const separator = process.platform !== 'win32' ? '━' : '-'
 app.listen(PORT, () => {
   const label =
     chalk.bgCyan.black(' 🌐 SERVER UP ') +
-    chalk.cyan(` http://localhost.com:${PORT}/`)
+    chalk.cyan(` http://localhost:${PORT}/`)
 
   console.log(
     '\n',
