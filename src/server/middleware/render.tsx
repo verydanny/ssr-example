@@ -20,6 +20,7 @@ export const serverRenderer = (
     } = res.locals.clientStats
     const chunkJS: string[] = []
     const chunkCSS: string[] = []
+    const hotUpdateRegex = /.*\.hot-update.*\.js$/
 
     const getClientIdName = (id: string | number) => {
       if (modulesById[id].name) {
@@ -45,7 +46,7 @@ export const serverRenderer = (
       if (clientModuleId[id] && clientModuleId[id].chunkFiles) {
         const chunks = clientModuleId[id].chunkFiles
 
-        return chunks.js
+        return chunks.js.filter((file: string) => !file.match(hotUpdateRegex))
       }
     }
 
