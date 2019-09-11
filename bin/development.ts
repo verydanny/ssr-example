@@ -11,7 +11,6 @@ import { serverConfig } from '../webpack/webpack.server.config'
 
 const env = {
   mode: 'development',
-  devtool: 'cheap-module-eval-source-map',
   path: resolve(process.cwd(), 'dist')
 } as const
 
