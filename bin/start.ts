@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-ts-ignore */
 import fs from 'fs'
+import chalk from 'chalk'
 import path from 'path'
 import express from 'express'
 import expressGzip from 'express-static-gzip'
@@ -7,6 +8,7 @@ import expressGzip from 'express-static-gzip'
 import { middleware, preloadAll } from '../dist/server/server'
 import { compose } from 'compose-middleware'
 
+const PORT = process.env.PORT
 const app = express()
 
 const composed = compose(middleware)
@@ -39,5 +41,21 @@ app.use(composed)
 app.use(publicPath, expressGzip(path.resolve(__dirname, '../dist/client'), {}))
 
 preloadAll().then(() => {
-  app.listen(8080, () => console.log('Listening on http://localhost:8080'))
+  const bottomsep = '═'
+  const separator = process.platform !== 'win32' ? '━' : '-'
+
+  app.listen(PORT, () => {
+    const label =
+      chalk.bgCyan.black(' 🌐 SERVER UP ') +
+      chalk.cyan(` http://localhost.com:${PORT}/`)
+
+    console.log(
+      '\n',
+      chalk.dim.bold(`${bottomsep.repeat(50)}`),
+      '\n',
+      label,
+      '\n',
+      chalk.dim(`${separator.repeat(50)}\n`)
+    )
+  })
 })

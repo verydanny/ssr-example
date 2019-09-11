@@ -7,9 +7,9 @@
   "license": "MIT",
   "private": false,
   "scripts": {
-    "dev": "ts-node -T --compiler-options '{\"module\":\"commonjs\"}' bin/development.ts",
+    "dev": "PORT=8080 ts-node -T --compiler-options '{\"module\":\"commonjs\"}' bin/development.ts",
     "prod": "ts-node -T --compiler-options '{\"module\":\"commonjs\"}' bin/production.ts",
-    "start": "ts-node -T --compiler-options '{\"module\":\"commonjs\"}' bin/start.ts"
+    "start": "PORT=8080 ts-node -T --compiler-options '{\"module\":\"commonjs\"}' bin/start.ts"
   },
   "devDependencies": {
     "@types/compression-webpack-plugin": "^2.0.1",
@@ -45,6 +45,7 @@
     "webpack-universal-compiler": "^1.2.0"
   },
   "dependencies": {
+    "chalk": "^2.4.2",
     "compose-middleware": "^5.0.1",
     "express": "^4.17.1",
     "express-static-gzip": "^2.0.5",

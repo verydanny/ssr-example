@@ -1,4 +1,5 @@
 import express from 'express'
+import chalk from 'chalk'
 import { resolve } from 'path'
 import webpackMerge from 'webpack-merge'
 import { universalMiddleware } from 'webpack-universal-compiler'
@@ -13,6 +14,8 @@ const env = {
   mode: 'development',
   path: resolve(process.cwd(), 'dist')
 } as const
+
+const PORT = process.env.PORT
 
 const clientConfigMerged = webpackMerge(sharedConfig(env), clientConfig(env))
 const serverConfigMerged = webpackMerge(sharedConfig(env), serverConfig(env))
@@ -66,6 +69,20 @@ app.use(
   }
 )
 
-app.listen(8080, () => {
-  console.log('Development server running on localhost:8080')
+const bottomsep = '═'
+const separator = process.platform !== 'win32' ? '━' : '-'
+
+app.listen(PORT, () => {
+  const label =
+    chalk.bgCyan.black(' 🌐 SERVER UP ') +
+    chalk.cyan(` http://localhost.com:${PORT}/`)
+
+  console.log(
+    '\n',
+    chalk.dim.bold(`${bottomsep.repeat(50)}`),
+    '\n',
+    label,
+    '\n',
+    chalk.dim(`${separator.repeat(50)}\n`)
+  )
 })
