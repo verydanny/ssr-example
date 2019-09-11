@@ -12,9 +12,40 @@ const env = {
   path: resolve(process.cwd(), 'dist')
 } as const
 
+const defaultStatsOptions = {
+  assets: true,
+  children: false,
+  chunks: false,
+  colors: true,
+  hash: false,
+  modules: false,
+  timings: false,
+  version: false,
+  builtAt: false,
+  entrypoints: false
+}
+
 const clientConfigMerged = webpackMerge(sharedConfig(env), clientConfig(env))
 const serverConfigMerged = webpackMerge(sharedConfig(env), serverConfig(env))
 
 const compiler = clientServerCompiler(clientConfigMerged, serverConfigMerged)
 
-compiler.run()
+compiler.run().then(({ clientStats, serverStats }) => {
+  if (clientStats && serverStats) {
+    const clientInfo = clientStats.toString(defaultStatsOptions)
+    const serverInfo = serverStats.toString(defaultStatsOptions)
+
+    if (serverStats.hasErrors() || clientStats.hasErrors()) {
+      console.log(clientInfo || serverInfo)
+    }
+
+    console.log(
+      '\n\nClient: \n\n',
+      clientInfo,
+      '\n\n',
+      'Server: \n\n',
+      serverInfo,
+      '\n\n'
+    )
+  }
+})

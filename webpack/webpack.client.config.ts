@@ -1,6 +1,7 @@
 import webpack from 'webpack'
 import { resolve } from 'path'
 import MiniCssExtractPlugin from 'mini-css-extract-plugin'
+import CompressionPlugin from 'compression-webpack-plugin'
 // import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer'
 
 import { WebpackConfig } from '../types/webpack-config'
@@ -33,6 +34,7 @@ export const clientConfig = (env: WebpackConfig) => {
     },
     target: 'web' as const,
     plugins: [
+      !_dev_ && new CompressionPlugin(),
       new webpack.HotModuleReplacementPlugin(),
       new MiniCssExtractPlugin({
         // Options similar to the same options in webpackOptions.output

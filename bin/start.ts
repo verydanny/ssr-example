@@ -2,6 +2,7 @@
 import fs from 'fs'
 import path from 'path'
 import express from 'express'
+import expressGzip from 'express-static-gzip'
 // @ts-ignore
 import { middleware, preloadAll } from '../dist/server/server'
 import { compose } from 'compose-middleware'
@@ -35,7 +36,7 @@ app.use(
 
 app.use(composed)
 
-app.use(publicPath, express.static(path.resolve(__dirname, '../dist/client')))
+app.use(publicPath, expressGzip(path.resolve(__dirname, '../dist/client'), {}))
 
 preloadAll().then(() => {
   app.listen(8080, () => console.log('Listening on http://localhost:8080'))
