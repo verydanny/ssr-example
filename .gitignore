@@ -4,3 +4,4 @@ lib
 .vscode
 dist
 yarn-error.log
+yarn.lock

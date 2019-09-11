@@ -15,7 +15,7 @@ export const serverConfig = (env: WebpackConfig) => {
       filename: 'server.js',
       chunkFilename: '[id].js',
       pathinfo: false,
-      libraryTarget: 'commonjs2' as const
+      libraryTarget: 'commonjs2'
     },
     module: {
       rules: [
