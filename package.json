@@ -8,7 +8,7 @@
   "private": false,
   "scripts": {
     "dev": "ts-node -T --compiler-options '{\"module\":\"commonjs\"}' bin/development.ts",
-    "prod": "ts-node -T --compiler-options '{\"module\":\"commonjs\"}' bin/production.ts",
+    "prod": "node --trace-warnings  node_modules/.bin/ts-node -T --compiler-options '{\"module\":\"commonjs\"}' bin/production.ts",
     "start": "ts-node -T --compiler-options '{\"module\":\"commonjs\"}' bin/start.ts",
     "webpack-defaults": "webpack-defaults"
   },

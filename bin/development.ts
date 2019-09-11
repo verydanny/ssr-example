@@ -1,7 +1,7 @@
 import express from 'express'
 import { resolve } from 'path'
 import webpackMerge from 'webpack-merge'
-import { webpackClientServerMiddleware } from 'webpack-universal-compiler'
+import { universalMiddleware } from 'webpack-universal-compiler'
 import { compose } from 'compose-middleware'
 import { transformStats } from './transform-stats'
 
@@ -22,14 +22,10 @@ const app = express()
 
 app.use('/', express.static('public', { maxAge: 0, etag: false }))
 
-const middleware = webpackClientServerMiddleware(
-  clientConfigMerged,
-  serverConfigMerged,
-  {
-    inMemoryFilesystem: true,
-    hot: true
-  }
-)
+const middleware = universalMiddleware(clientConfigMerged, serverConfigMerged, {
+  inMemoryFilesystem: true,
+  hot: true
+})
 
 app.use(middleware)
 
