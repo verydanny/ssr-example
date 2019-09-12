@@ -34,8 +34,8 @@ export const clientConfig = (env: WebpackConfig) => {
     },
     target: 'web' as const,
     plugins: [
+      _dev_ && new webpack.HotModuleReplacementPlugin(),
       !_dev_ && new CompressionPlugin(),
-      new webpack.HotModuleReplacementPlugin(),
       new MiniCssExtractPlugin({
         // Options similar to the same options in webpackOptions.output
         // all options are optional
