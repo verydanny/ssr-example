@@ -1,5 +1,7 @@
 import React from 'react'
 
-export const { Provider, Consumer } = React.createContext({
+export const Context = React.createContext({
   updateChunk: (webpack: () => string | number) => {}
 })
+
+export const { Consumer, Provider } = Context

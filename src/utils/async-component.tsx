@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/camelcase */
-import React from 'react'
-import { Consumer } from './async-context'
+import React, { useState, useContext, useEffect } from 'react'
+import { Consumer, Context } from './async-context'
 
 type GetProps<T> = T extends React.ComponentType<infer P> ? P : never
 
@@ -17,7 +17,7 @@ type ResolvedPromise<T extends DefaultOrNamedExport> = {
 interface LoadInterface {
   loading: boolean
   error?: any
-  loaded: boolean | React.ComponentType<any>
+  loaded: false | React.ComponentType<any>
   Promise: Promise<any> | undefined
 }
 
@@ -35,6 +35,7 @@ function load<ImportFunc extends () => Promise<any>>(importFunc: ImportFunc) {
 
   const state: LoadInterface = {
     loading: true,
+    error: false,
     loaded: false,
     Promise: undefined
   }
@@ -111,87 +112,44 @@ export function asyncComponent<
     })
   }
 
-  return class AsyncComponent extends React.Component<Props, HOCState<Props>> {
-    _mounted = false
+  return function AsyncComponent(props: Props) {
+    init()
+    const { updateChunk } = useContext(Context)
+    const [error, setError] = useState(res.error)
+    const [loading, setLoading] = useState(res.loading)
+    const [loaded, setLoaded] = useState(res.loaded as any)
+    const [importPromise] = useState(res.Promise)
 
-    constructor(props: Props) {
-      super(props)
-      init()
-
-      this.state = {
-        error: false,
-        loading: res.loading,
-        loaded: res.loaded
-      }
-    }
-
-    componentDidMount() {
-      this._mounted = true
-      this._loadModule()
-    }
-
-    componentWillUnmount() {
-      this._mounted = false
-    }
-
-    _loadModule() {
-      if (!res.loading) {
+    useEffect(() => {
+      if (!loading) {
         return
       }
 
       const update = () => {
-        if (!this._mounted) {
-          return
-        }
-
-        this.setState({
-          error: res.error,
-          loaded: res.loaded,
-          loading: res.loading
-        })
+        setError(res.error)
+        setLoaded(res.loaded)
+        setLoading(res.loading)
       }
 
-      if (res.Promise) {
-        res.Promise.then(() => {
-          update()
-        }).catch(() => {
-          update()
-        })
+      if (importPromise) {
+        importPromise
+          .then(() => {
+            update()
+          })
+          .catch(() => {
+            update()
+          })
       }
+    })
+
+    if (loading) {
+      return React.createElement(LoadingComp)
+    } else if (loaded && typeof loaded === 'object') {
+      updateChunk(webpack)
+      return React.createElement(loaded[exportName], props)
     }
 
-    retry = () => {
-      this.setState({ loading: true })
-      res = load(importComponent)
-      this._loadModule()
-    }
-
-    render() {
-      if (this.state.loading) {
-        return React.createElement(LoadingComp)
-      } else if (this.state.loaded && typeof this.state.loaded === 'object') {
-        return (
-          <Consumer>
-            {({ updateChunk }) => {
-              if (typeof updateChunk === 'function') {
-                updateChunk(webpack)
-              }
-
-              if (typeof this.state.loaded === 'object') {
-                return React.createElement(
-                  this.state.loaded[exportName],
-                  this.props
-                )
-              }
-
-              return null
-            }}
-          </Consumer>
-        )
-      } else {
-        return null
-      }
-    }
+    return null
   }
 }
 
