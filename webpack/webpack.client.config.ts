@@ -1,14 +1,20 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+// @ts-ignore
+import { StatsWriterPlugin } from 'webpack-stats-plugin'
+
 import webpack from 'webpack'
 import { resolve } from 'path'
 import MiniCssExtractPlugin from 'mini-css-extract-plugin'
 import CompressionPlugin from 'compression-webpack-plugin'
 // import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer'
 
+import { transformClientStats } from '../bin/transform-stats'
 import { WebpackConfig } from '../types/webpack-config'
 
 export const clientConfig = (env: WebpackConfig) => {
   const { path, mode } = env
   const _dev_ = mode === 'development'
+  const _prod_ = mode === 'production'
 
   return {
     name: 'client',
@@ -33,17 +39,6 @@ export const clientConfig = (env: WebpackConfig) => {
       }
     },
     target: 'web' as const,
-    plugins: [
-      _dev_ && new webpack.HotModuleReplacementPlugin(),
-      !_dev_ && new CompressionPlugin(),
-      new MiniCssExtractPlugin({
-        // Options similar to the same options in webpackOptions.output
-        // all options are optional
-        filename: 'client.css',
-        chunkFilename: '[id].css',
-        ignoreOrder: false // Enable to remove warnings about conflicting order
-      })
-    ].filter(Boolean),
     module: {
       rules: [
         {
@@ -65,6 +60,46 @@ export const clientConfig = (env: WebpackConfig) => {
           ]
         }
       ]
-    }
+    },
+    plugins: [
+      _dev_ && new webpack.HotModuleReplacementPlugin(),
+      _prod_ && new CompressionPlugin(),
+      new MiniCssExtractPlugin({
+        // Options similar to the same options in webpackOptions.output
+        // all options are optional
+        filename: 'client.css',
+        chunkFilename: '[id].css',
+        ignoreOrder: false // Enable to remove warnings about conflicting order
+      }),
+      _prod_ &&
+        new StatsWriterPlugin({
+          fields: null,
+          stats: {
+            hash: true,
+            colors: false,
+            chunks: true,
+            chunkGroups: true,
+            chunkModules: true,
+            chunkOrigins: true,
+            entrypoints: true,
+            assets: true,
+            modules: true,
+            builtAt: false,
+            children: false,
+            cached: false,
+            errors: false,
+            errorDetails: false,
+            timings: false,
+            version: false,
+            warnings: false,
+            reasons: false,
+            publicPath: true,
+            performance: false,
+            moduleTrace: true,
+            maxModules: Infinity
+          },
+          transform: transformClientStats
+        })
+    ].filter(Boolean)
   } as webpack.Configuration
 }

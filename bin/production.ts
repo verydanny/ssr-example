@@ -29,22 +29,29 @@ const serverConfigMerged = webpackMerge(sharedConfig(env), serverConfig(env))
 
 const compiler = universalCompiler(clientConfigMerged, serverConfigMerged)
 
-compiler.run().then(({ clientStats, serverStats }) => {
-  if (clientStats && serverStats) {
-    const clientInfo = clientStats.toString(defaultStatsOptions)
-    const serverInfo = serverStats.toString(defaultStatsOptions)
-
-    if (serverStats.hasErrors() || clientStats.hasErrors()) {
-      console.log(clientInfo || serverInfo)
-    }
-
-    console.log(
-      '\n\nClient: \n\n',
-      clientInfo,
-      '\n\n',
-      'Server: \n\n',
-      serverInfo,
-      '\n\n'
-    )
-  }
+compiler.run().then((stats) => {
+  console.log(stats)
 })
+
+// compiler
+//   .run()
+//   .then(({ clientStats, serverStats }) => {
+//     if (clientStats && serverStats) {
+//       const clientInfo = clientStats.toString(defaultStatsOptions)
+//       const serverInfo = serverStats.toString(defaultStatsOptions)
+
+//       if (serverStats.hasErrors() || clientStats.hasErrors()) {
+//         console.log(clientInfo || serverInfo)
+//       }
+
+//       console.log(
+//         '\n\nClient: \n\n',
+//         clientInfo,
+//         '\n\n',
+//         'Server: \n\n',
+//         serverInfo,
+//         '\n\n'
+//       )
+//     }
+//   })
+//   .catch(e => console.log(e))
