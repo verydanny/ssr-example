@@ -22,6 +22,18 @@ export const serverConfig = (env: WebpackConfig) => {
     module: {
       rules: [
         {
+          test: /\.tsx?$/,
+          loader: 'babel-loader',
+          exclude: /node_modules/,
+          options: {
+            cacheDirectory: true,
+            envName:
+              mode === 'development'
+                ? 'development_server'
+                : 'production_server'
+          }
+        },
+        {
           // For CSS modules
           test: /\.css$/i,
           exclude: /node_modules/,

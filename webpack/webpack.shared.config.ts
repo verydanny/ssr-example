@@ -14,31 +14,6 @@ export const sharedConfig = (env: WebpackConfig) => {
   return {
     name: target,
     mode,
-    devtool:
-      _dev_ && _server_
-        ? 'inline-source-map'
-        : _prod_ && _server_
-        ? 'source-map'
-        : _dev_ && _client_
-        ? 'cheap-module-eval-source-map'
-        : 'source-map',
-    module: {
-      rules: [
-        {
-          test: /\.tsx?$/,
-          exclude: /node_modules/,
-          use: [
-            {
-              loader: 'ts-loader',
-              options: {
-                // disable type checker - we will use it in fork plugin
-                transpileOnly: true
-              }
-            }
-          ].filter(Boolean)
-        }
-      ]
-    },
     optimization: {
       namedChunks: false,
       namedModules: false,

@@ -1,8 +1,7 @@
 {
 	"compilerOptions": {
 		"module": "esnext",
-		"target": "esnext",
-		"outDir": "lib",
+		"target": "es2018",
 		"lib": [
 			"dom",
 			"esnext"
@@ -10,6 +9,8 @@
 		"moduleResolution": "node",
 		"jsx": "react",
 		"strict": true,
+		"noEmit": true,
+		"downlevelIteration": true,
 		"noImplicitReturns": true,
 		"noUnusedLocals": true,
 		"noImplicitAny": true,
@@ -18,7 +19,6 @@
 		"sourceMap": true,
 		"skipLibCheck": true,
 		"skipDefaultLibCheck": true,
-		"downlevelIteration": true,
 		"importHelpers": true
 	},
 	"exclude": [
@@ -27,9 +27,6 @@
 		"dist"
 	],
 	"include": [
-		"bin",
-		"src",
-		"types",
-		"webpack"
+		"src"
 	]
 }

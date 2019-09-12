@@ -48,6 +48,18 @@ export const clientConfig = (env: WebpackConfig) => {
     module: {
       rules: [
         {
+          test: /\.tsx?$/,
+          loader: 'babel-loader',
+          exclude: /node_modules/,
+          options: {
+            cacheDirectory: true,
+            envName:
+              mode === 'development'
+                ? 'development_client'
+                : 'production_client'
+          }
+        },
+        {
           // For CSS modules
           test: /\.css$/i,
           exclude: /node_modules/,
