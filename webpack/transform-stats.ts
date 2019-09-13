@@ -16,6 +16,28 @@ interface UniversalStatsPluginOptions {
   filename?: string
 }
 
+interface Files {
+  js: string[]
+  css: string[]
+}
+
+interface Entry {
+  [x: string]: Files
+}
+
+interface WebpackStubbedModule {
+  id: number
+  name: string
+  files: Files
+}
+
+interface Stats {
+  [x: string]: {
+    name?: string
+    files: Files
+  }
+}
+
 const defaultOptions = {
   env: undefined,
   path: undefined,
@@ -27,9 +49,9 @@ export function buildStats(
   env: 'client' | 'server'
 ) {
   const { chunkGroups } = compilation
-  const entry: any = {}
-  const moduleArray: any = []
-  const stats: any = {}
+  const entry: Entry = {}
+  const moduleArray: WebpackStubbedModule[] = []
+  const stats: Stats = {}
 
   for (const chunkGroup of chunkGroups) {
     const chunkGroupFiles = chunkGroup.getFiles()

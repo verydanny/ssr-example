@@ -5,7 +5,6 @@ import { WebpackConfig } from '../types/webpack-config'
 
 export const sharedConfig = (env: WebpackConfig) => {
   const { mode } = env
-  const _dev_ = mode === 'development'
 
   return {
     mode,

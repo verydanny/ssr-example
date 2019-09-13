@@ -5,7 +5,6 @@ import { UniversalStatsPlugin } from './transform-stats'
 
 export const serverConfig = (env: WebpackConfig) => {
   const { path, mode } = env
-  const _dev_ = mode === 'development'
   const _prod_ = mode === 'production'
 
   return {
