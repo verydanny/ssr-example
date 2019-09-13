@@ -1,10 +1,14 @@
 import webpack from 'webpack'
 import { CleanWebpackPlugin } from 'clean-webpack-plugin'
+import { warmup } from 'thread-loader'
 
 import { WebpackConfig } from '../types/webpack-config'
 
 export const sharedConfig = (env: WebpackConfig) => {
   const { mode } = env
+  const _prod_ = mode === 'production'
+
+  warmup({}, ['ts-loader'])
 
   return {
     mode,
@@ -12,12 +16,18 @@ export const sharedConfig = (env: WebpackConfig) => {
       rules: [
         {
           test: /\.tsx?$/,
-          loader: 'ts-loader',
           exclude: /node_modules/,
-          options: {
-            // disable type checker - we will use it in fork plugin
-            transpileOnly: true
-          }
+          use: [
+            _prod_ && 'thread-loader',
+            {
+              loader: 'ts-loader',
+              options: {
+                // disable type checker - we will use it in fork plugin
+                transpileOnly: true,
+                happyPackMode: true
+              }
+            }
+          ].filter(Boolean)
         }
       ]
     },

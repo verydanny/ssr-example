@@ -11,18 +11,18 @@ export const serverRenderer = (
   next: NextFunction
 ) => {
   if (req.method === 'GET' && req.path === '/') {
-    const { stats: serverStats } = res.locals.serverStats
-    const { publicPath, entry, stats: clientStats } = res.locals.clientStats
+    const moduleIds = res.locals.serverStats
+    const { publicPath, entry, ...stats } = res.locals.clientStats
     const entrypoint = entry.main
     const chunkJS: string[] = []
     const chunkCSS: string[] = []
     const hotUpdateRegex = /.*\.hot-update.*\.js$/
 
     const getClientFiles = (id: string | number) => {
-      if (serverStats[id]) {
-        const serverModuleName = serverStats[id].name
+      if (moduleIds[id]) {
+        const serverModuleName = moduleIds[id].name
 
-        return clientStats[serverModuleName]
+        return stats[serverModuleName]
       }
 
       return undefined

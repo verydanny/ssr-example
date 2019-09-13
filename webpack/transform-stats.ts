@@ -44,7 +44,7 @@ const defaultOptions = {
   filename: 'stats.json'
 }
 
-export function buildStats(
+function buildStats(
   compilation: webpack.compilation.Compilation,
   env: 'client' | 'server'
 ) {
@@ -128,6 +128,32 @@ export function buildStats(
   }
 
   return { entry, stats }
+}
+
+export const buildDevStats = (
+  compilation: webpack.compilation.Compilation,
+  env: 'client' | 'server'
+) => {
+  const { entry, stats } = buildStats(compilation, env)
+
+  if (env === 'client') {
+    return {
+      entry,
+      publicPath:
+        compilation.compiler &&
+        compilation.compiler.options &&
+        compilation.compiler.options.output &&
+        compilation.compiler.options.output.publicPath
+          ? compilation.compiler.options.output.publicPath
+          : '/',
+      statsEnv: env,
+      ...stats
+    }
+  } else {
+    return {
+      ...stats
+    }
+  }
 }
 
 export class UniversalStatsPlugin {

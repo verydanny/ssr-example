@@ -4,7 +4,7 @@ import { resolve } from 'path'
 import webpackMerge from 'webpack-merge'
 import { universalMiddleware } from 'webpack-universal-compiler'
 import { compose } from 'compose-middleware'
-import { buildStats } from '../webpack/transform-stats'
+import { buildDevStats } from '../webpack/transform-stats'
 
 import { sharedConfig } from '../webpack/webpack.shared.config'
 import { clientConfig } from '../webpack/webpack.client.config'
@@ -58,14 +58,8 @@ app.use(
     if (res.locals.universal && res.locals.universal.compilation) {
       const { clientStats, serverStats } = res.locals.universal.compilation
 
-      res.locals.clientStats = {
-        publicPath: clientStats.compilation.options.output.publicPath,
-        ...buildStats(clientStats.compilation, 'client')
-      }
-      res.locals.serverStats = {
-        publicPath: clientStats.compilation.options.output.publicPath,
-        ...buildStats(serverStats.compilation, 'server')
-      }
+      res.locals.clientStats = buildDevStats(clientStats.compilation, 'client')
+      res.locals.serverStats = buildDevStats(serverStats.compilation, 'server')
     }
 
     next()
