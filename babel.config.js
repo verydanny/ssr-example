@@ -10,7 +10,7 @@ module.exports = api => {
         '@babel/preset-env',
         {
           targets: {
-            node: 'current',
+            node: 'current'
           },
           modules: false
         }
@@ -19,7 +19,7 @@ module.exports = api => {
         '@babel/preset-env',
         {
           targets: {
-            browsers: 'last 2 Chrome versions',
+            browsers: 'last 2 Chrome versions'
           },
           modules: false
         }
@@ -28,7 +28,7 @@ module.exports = api => {
         '@babel/preset-env',
         {
           targets: {
-            browsers: 'last 2 Chrome versions',
+            browsers: 'last 2 Chrome versions'
           },
           modules: false
         }
