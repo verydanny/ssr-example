@@ -7,8 +7,11 @@ import { WebpackConfig } from '../types/webpack-config'
 export const sharedConfig = (env: WebpackConfig) => {
   const { mode } = env
   const _prod_ = mode === 'production'
+  const _dev_ = mode === 'development'
 
-  warmup({}, ['ts-loader'])
+  if (_dev_) {
+    warmup({}, ['ts-loader'])
+  }
 
   return {
     mode,
@@ -24,7 +27,7 @@ export const sharedConfig = (env: WebpackConfig) => {
               options: {
                 // disable type checker - we will use it in fork plugin
                 transpileOnly: true,
-                happyPackMode: true
+                happyPackMode: _prod_
               }
             }
           ].filter(Boolean)
