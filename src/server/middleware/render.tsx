@@ -11,53 +11,32 @@ export const serverRenderer = (
   next: NextFunction
 ) => {
   if (req.method === 'GET' && req.path === '/') {
-    const { modulesById } = res.locals.serverStats
-    const {
-      modulesById: clientModuleId,
-      modulesByName: clientModuleName,
-      entrypoints,
-      publicPath
-    } = res.locals.clientStats
+    const { stats: serverStats } = res.locals.serverStats
+    const { publicPath, entry, stats: clientStats } = res.locals.clientStats
+    const entrypoint = entry.main
     const chunkJS: string[] = []
     const chunkCSS: string[] = []
     const hotUpdateRegex = /.*\.hot-update.*\.js$/
 
-    const getClientIdName = (id: string | number) => {
-      if (modulesById[id].name) {
-        const serverModuleName = modulesById[id].name
+    const getClientFiles = (id: string | number) => {
+      if (serverStats[id]) {
+        const serverModuleName = serverStats[id].name
 
-        return clientModuleName[serverModuleName].id
-          ? clientModuleName[serverModuleName].id
-          : undefined
+        return clientStats[serverModuleName]
       }
 
       return undefined
     }
 
-    const getClientCss = (id: number) => {
-      if (clientModuleId[id] && clientModuleId[id].chunkFiles) {
-        const chunks = clientModuleId[id].chunkFiles
-
-        return chunks.css
-      }
-    }
-
-    const getClientJs = (id: number) => {
-      if (clientModuleId[id] && clientModuleId[id].chunkFiles) {
-        const chunks = clientModuleId[id].chunkFiles
-
-        return chunks.js.filter((file: string) => !file.match(hotUpdateRegex))
-      }
-    }
-
     const sortModules = (webpack: () => string | number) => {
-      const moduleId = webpack()
+      const { files } = getClientFiles(webpack())
 
-      const normalizedId = getClientIdName(moduleId)
-
-      if (normalizedId) {
-        chunkJS.push(...getClientJs(normalizedId))
-        chunkCSS.push(...getClientCss(normalizedId))
+      if (files.js || files.css) {
+        const filterHot = files.js.filter(
+          (file: string) => !hotUpdateRegex.test(file)
+        )
+        chunkJS.push(...filterHot)
+        chunkCSS.push(...files.css)
       }
     }
 
@@ -72,7 +51,7 @@ export const serverRenderer = (
       <html>
         <head>
           <title>Apps</title>
-          ${entrypoints.css
+          ${entrypoint.css
             .map(
               (chunk: string) =>
                 `<link href="${publicPath}${String(chunk)}" rel="stylesheet">`
@@ -93,7 +72,7 @@ export const serverRenderer = (
                 `<script src="${publicPath}${String(chunk)}" async></script>`
             )
             .join('')}
-          ${entrypoints.js
+          ${entrypoint.js
             .map(
               (chunk: string) =>
                 `<script src="${publicPath}${String(chunk)}" async></script>`

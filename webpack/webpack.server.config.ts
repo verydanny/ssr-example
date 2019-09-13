@@ -1,15 +1,12 @@
 import webpack from 'webpack'
 import { WebpackConfig } from '../types/webpack-config'
 import { resolve } from 'path'
-
-// eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-// @ts-ignore
-import { StatsWriterPlugin } from 'webpack-stats-plugin'
-import { transformServerStats } from '../bin/transform-stats'
+import { UniversalStatsPlugin } from './transform-stats'
 
 export const serverConfig = (env: WebpackConfig) => {
   const { path, mode } = env
   const _dev_ = mode === 'development'
+  const _prod_ = mode === 'production'
 
   return {
     name: 'server',
@@ -41,35 +38,10 @@ export const serverConfig = (env: WebpackConfig) => {
       ]
     },
     plugins: [
-      !_dev_ &&
-        new StatsWriterPlugin({
-          fields: null,
-          stats: {
-            hash: true,
-            colors: false,
-            chunks: true,
-            chunkGroups: true,
-            chunkModules: true,
-            chunkOrigins: true,
-            entrypoints: true,
-            assets: true,
-            modules: true,
-            builtAt: false,
-            children: false,
-            cached: false,
-            errors: false,
-            errorDetails: false,
-            timings: false,
-            version: false,
-            warnings: false,
-            reasons: false,
-            publicPath: true,
-            performance: false,
-            moduleTrace: true,
-            maxModules: Infinity
-          },
-          transform: transformServerStats
+      _prod_ &&
+        new UniversalStatsPlugin({
+          env: 'server'
         })
-    ]
+    ].filter(Boolean)
   } as webpack.Configuration
 }

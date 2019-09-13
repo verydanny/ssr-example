@@ -1,14 +1,9 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-// @ts-ignore
-import { StatsWriterPlugin } from 'webpack-stats-plugin'
-
 import webpack from 'webpack'
 import { resolve } from 'path'
 import MiniCssExtractPlugin from 'mini-css-extract-plugin'
 import CompressionPlugin from 'compression-webpack-plugin'
+import { UniversalStatsPlugin } from './transform-stats'
 // import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer'
-
-import { transformClientStats } from '../bin/transform-stats'
 import { WebpackConfig } from '../types/webpack-config'
 
 export const clientConfig = (env: WebpackConfig) => {
@@ -28,14 +23,23 @@ export const clientConfig = (env: WebpackConfig) => {
       path: resolve(path, 'client/'),
       filename: 'client.js',
       publicPath: '/assets/',
-      chunkFilename: '[id].[hash:5].js',
+      chunkFilename: '[name].[hash:5].js',
       pathinfo: false,
       hotUpdateMainFilename: 'hot-update.json',
       hotUpdateChunkFilename: '[id].hot-update.js'
     },
     optimization: {
       splitChunks: {
-        chunks: 'all'
+        chunks: 'all',
+        cacheGroups: {
+          vendors: false,
+          default: false,
+          vendorReactDom: {
+            test: /node_modules\/react-dom\//,
+            name: 'react-dom',
+            priority: 10
+          }
+        }
       }
     },
     target: 'web' as const,
@@ -72,33 +76,8 @@ export const clientConfig = (env: WebpackConfig) => {
         ignoreOrder: false // Enable to remove warnings about conflicting order
       }),
       _prod_ &&
-        new StatsWriterPlugin({
-          fields: null,
-          stats: {
-            hash: true,
-            colors: false,
-            chunks: true,
-            chunkGroups: true,
-            chunkModules: true,
-            chunkOrigins: true,
-            entrypoints: true,
-            assets: true,
-            modules: true,
-            builtAt: false,
-            children: false,
-            cached: false,
-            errors: false,
-            errorDetails: false,
-            timings: false,
-            version: false,
-            warnings: false,
-            reasons: false,
-            publicPath: true,
-            performance: false,
-            moduleTrace: true,
-            maxModules: Infinity
-          },
-          transform: transformClientStats
+        new UniversalStatsPlugin({
+          env: 'client'
         })
     ].filter(Boolean)
   } as webpack.Configuration

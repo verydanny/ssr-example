@@ -22,6 +22,10 @@ export const sharedConfig = (env: WebpackConfig) => {
         }
       ]
     },
+    optimization: {
+      namedChunks: false,
+      namedModules: false
+    },
     plugins: [new CleanWebpackPlugin()].filter(Boolean),
     resolve: {
       extensions: ['.tsx', '.ts', '.js']
