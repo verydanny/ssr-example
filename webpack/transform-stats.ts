@@ -28,13 +28,13 @@ interface Entry {
 interface WebpackStubbedModule {
   id: number
   name: string
-  files: Files
+  files?: Files
 }
 
 interface Stats {
   [x: string]: {
     name?: string
-    files: Files
+    files?: Files
   }
 }
 
@@ -48,7 +48,7 @@ export function buildStats(
   compilation: webpack.compilation.Compilation,
   env: 'client' | 'server'
 ) {
-  const { chunkGroups } = compilation
+  const { chunkGroups, modules } = compilation
   const entry: Entry = {}
   const moduleArray: WebpackStubbedModule[] = []
   const stats: Stats = {}
@@ -67,7 +67,7 @@ export function buildStats(
 
     // There are 2 kinds of ChunkGroups. EntryPoints (top level) and
     // ChunkGroups, which is what splits off when you use import()
-    if (chunkGroup.constructor.name === 'ChunkGroup') {
+    if (env === 'client' && chunkGroup.constructor.name === 'ChunkGroup') {
       for (const chunk of chunkGroup.chunks) {
         const modulesInCurrentChunk = chunk.getModules()
 
@@ -91,17 +91,38 @@ export function buildStats(
         }
       }
     }
+
+    if (env === 'server') {
+      for (const module of modules) {
+        if (module.rawRequest) {
+          moduleArray.push({
+            id: module.id,
+            name: module.rawRequest,
+            files: undefined
+          })
+        }
+
+        if (
+          !module.rawRequest &&
+          module.constructor.name === 'ConcatenatedModule'
+        ) {
+          moduleArray.push({
+            id: module.id,
+            name: module.rootModule.rawRequest
+          })
+        }
+      }
+    }
   }
 
   for (const { id, name, files } of moduleArray) {
     if (env === 'client') {
       stats[name] = {
-        files
+        files: files ? files : { js: [], css: [] }
       }
     } else if (env === 'server') {
       stats[id] = {
-        name,
-        files
+        name
       }
     }
   }
