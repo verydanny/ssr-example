@@ -9,7 +9,7 @@ export const sharedConfig = (env: WebpackConfig) => {
   const _prod_ = mode === 'production'
   const _dev_ = mode === 'development'
 
-  if (_dev_) {
+  if (_prod_) {
     warmup({}, ['ts-loader'])
   }
 
