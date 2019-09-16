@@ -64,14 +64,14 @@ function buildStats(
   const stats: Stats = {}
 
   for (const chunkGroup of chunkGroups) {
-    const chunkGroupFiles = chunkGroup.getFiles()
-    const files = {
-      js: chunkGroupFiles.filter((file: string) => /\.js$/.test(file)),
-      css: chunkGroupFiles.filter((file: string) => /\.css$/.test(file))
-    }
-
     // Get chunks for entrypoint
     if (chunkGroup.constructor.name === 'Entrypoint') {
+      const chunkGroupFiles = chunkGroup.getFiles()
+      const files = {
+        js: chunkGroupFiles.filter((file: string) => /\.js$/.test(file)),
+        css: chunkGroupFiles.filter((file: string) => /\.css$/.test(file))
+      }
+
       entry[chunkGroup.name] = files
     }
 
@@ -80,6 +80,10 @@ function buildStats(
     if (env === 'client' && chunkGroup.constructor.name === 'ChunkGroup') {
       for (const chunk of chunkGroup.chunks) {
         const modulesInCurrentChunk = chunk.getModules()
+        const files = {
+          js: chunk.files.filter((file: string) => /\.js$/.test(file)),
+          css: chunk.files.filter((file: string) => /\.css$/.test(file))
+        }
 
         for (const module of modulesInCurrentChunk) {
           if (module.rawRequest) {
