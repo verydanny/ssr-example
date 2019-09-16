@@ -30,12 +30,14 @@ interface WebpackStubbedModule {
   id: number
   name: string
   files?: Files
+  chunkGroupFiles?: Files
 }
 
 interface Stats {
   [x: string]: {
     name?: string
     files?: Files
+    chunkGroupFiles?: Files
   }
 }
 
@@ -64,15 +66,14 @@ function buildStats(
   const stats: Stats = {}
 
   for (const chunkGroup of chunkGroups) {
+    const getChunkGroupFiles = chunkGroup.getFiles()
+    const chunkGroupFiles = {
+      js: getChunkGroupFiles.filter((file: string) => /\.js$/.test(file)),
+      css: getChunkGroupFiles.filter((file: string) => /\.css$/.test(file))
+    }
     // Get chunks for entrypoint
     if (chunkGroup.constructor.name === 'Entrypoint') {
-      const chunkGroupFiles = chunkGroup.getFiles()
-      const files = {
-        js: chunkGroupFiles.filter((file: string) => /\.js$/.test(file)),
-        css: chunkGroupFiles.filter((file: string) => /\.css$/.test(file))
-      }
-
-      entry[chunkGroup.name] = files
+      entry[chunkGroup.name] = chunkGroupFiles
     }
 
     // There are 2 kinds of ChunkGroups. EntryPoints (top level) and
@@ -90,6 +91,7 @@ function buildStats(
             moduleArray.push({
               id: module.id,
               name: module.rawRequest,
+              chunkGroupFiles,
               files
             })
           }
@@ -100,6 +102,7 @@ function buildStats(
             moduleArray.push({
               id: module.id,
               name: module.rootModule.rawRequest,
+              chunkGroupFiles,
               files
             })
           }
@@ -112,8 +115,7 @@ function buildStats(
         if (module.rawRequest) {
           moduleArray.push({
             id: module.id,
-            name: module.rawRequest,
-            files: undefined
+            name: module.rawRequest
           })
         }
         if (
@@ -129,14 +131,17 @@ function buildStats(
     }
   }
 
-  for (const { id, name, files } of moduleArray) {
-    if (env === 'client') {
+  if (env === 'client') {
+    for (const { name, files, chunkGroupFiles } of moduleArray) {
       stats[name] = {
-        files: files ? files : { js: [], css: [] }
+        files: files ? files : { js: [], css: [] },
+        chunkGroupFiles: chunkGroupFiles ? chunkGroupFiles : { js: [], css: [] }
       }
     }
+  }
 
-    if (env === 'server') {
+  if (env === 'server') {
+    for (const { id, name } of moduleArray) {
       stats[id] = {
         name
       }
