@@ -37,6 +37,7 @@
     "lit-html": "^1.1.2",
     "mini-css-extract-plugin": "^0.8.0",
     "prettier": "^1.18.2",
+    "rambda": "^3.0.1",
     "style-loader": "^1.0.0",
     "terser-webpack-plugin": "^2.0.1",
     "ts-loader": "^6.0.4",

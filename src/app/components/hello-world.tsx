@@ -5,13 +5,13 @@ import style from './style.css'
 const SomeAsyncComponent = asyncComponent(
   () => import('./foo-one'),
   () => require.resolveWeak('./foo-one'),
-  'HelloWorldTwo'
+  'FooOne'
 )
 
 const SomeOtherAsync = asyncComponent(
   () => import('./foo-two'),
   () => require.resolveWeak('./foo-two'),
-  'HelloWorldTwo'
+  'FooTwo'
 )
 
 export const HelloWorld = () => (

@@ -38,6 +38,12 @@ export const clientConfig = (env: WebpackConfig) => {
             test: /node_modules\/react-dom\//,
             name: 'react-dom',
             priority: 10
+          },
+          core: {
+            test: /node_modules/,
+            name: 'core',
+            chunks: 'all',
+            minSize: 0
           }
         }
       }
@@ -77,7 +83,8 @@ export const clientConfig = (env: WebpackConfig) => {
       }),
       _prod_ &&
         new UniversalStatsPlugin({
-          env: 'client'
+          env: 'client',
+          module: true
         })
     ].filter(Boolean)
   } as webpack.Configuration

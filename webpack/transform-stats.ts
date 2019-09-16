@@ -14,6 +14,7 @@ interface UniversalStatsPluginOptions {
   env?: 'client' | 'server'
   path?: string | false
   filename?: string
+  module: boolean
 }
 
 interface Files {
@@ -38,10 +39,19 @@ interface Stats {
   }
 }
 
-const defaultOptions = {
+const defaultOptions: UniversalStatsPluginOptions = {
   env: undefined,
   path: undefined,
-  filename: 'stats.json'
+  filename: 'stats',
+  module: false
+}
+
+function makeModule(isModule: boolean, jsonString: string) {
+  return isModule ? `module.exports = ${jsonString}` : jsonString
+}
+
+function makeFilename(isModule: boolean, filename?: string) {
+  return isModule && filename ? `${filename}.js` : `${filename}.json}`
 }
 
 function buildStats(
@@ -78,7 +88,8 @@ function buildStats(
               name: module.rawRequest,
               files
             })
-          } else if (
+          }
+          if (
             !module.rawRequest &&
             module.constructor.name === 'ConcatenatedModule'
           ) {
@@ -101,7 +112,6 @@ function buildStats(
             files: undefined
           })
         }
-
         if (
           !module.rawRequest &&
           module.constructor.name === 'ConcatenatedModule'
@@ -120,7 +130,9 @@ function buildStats(
       stats[name] = {
         files: files ? files : { js: [], css: [] }
       }
-    } else if (env === 'server') {
+    }
+
+    if (env === 'server') {
       stats[id] = {
         name
       }
@@ -150,9 +162,7 @@ export const buildDevStats = (
       ...stats
     }
   } else {
-    return {
-      ...stats
-    }
+    return stats
   }
 }
 
@@ -190,28 +200,31 @@ export class UniversalStatsPlugin {
           statsEnv: this.options.env,
           ...stats
         })
+        const statsModule = makeModule(this.options.module, statsString)
+        const statsFilename = makeFilename(
+          this.options.module,
+          this.options.filename
+        )
 
-        if (this.options.path && this.options.filename) {
+        if (this.options.path) {
           const normalizePath = path.resolve(this.options.path)
 
-          const fullPath = path.join(normalizePath, this.options.filename)
+          const fullPath = path.join(normalizePath, statsFilename)
           const dirPath = path.dirname(fullPath)
 
           try {
             ensureDirSync(dirPath)
-            fs.writeFileSync(fullPath, statsString)
+            fs.writeFileSync(fullPath, statsModule)
           } catch (err) {
             if (err.code !== 'EEXIST') throw err
           }
         } else {
-          if (this.options.filename) {
-            compilation.assets[this.options.filename] = {
-              source() {
-                return statsString
-              },
-              size() {
-                return statsString.length
-              }
+          compilation.assets[statsFilename] = {
+            source() {
+              return statsModule
+            },
+            size() {
+              return statsModule.length
             }
           }
         }

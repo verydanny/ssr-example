@@ -39,7 +39,8 @@ export const serverConfig = (env: WebpackConfig) => {
     plugins: [
       _prod_ &&
         new UniversalStatsPlugin({
-          env: 'server'
+          env: 'server',
+          module: true
         })
     ].filter(Boolean)
   } as webpack.Configuration
