@@ -1,20 +1,15 @@
 import webpack from 'webpack'
 import { WebpackConfig } from '../types/webpack-config'
 import { resolve } from 'path'
-import { UniversalStatsPlugin } from './transform-stats'
 
 export const serverConfig = (env: WebpackConfig) => {
-  const { path, mode } = env
-  const _prod_ = mode === 'production'
+  const { path, target } = env
 
   return {
-    name: 'server',
-    devtool: mode === 'development' ? 'inline-source-map' : 'source-map',
     entry: './src/server/entry.ts',
-    target: 'node' as const,
     output: {
       path: resolve(path, 'server/'),
-      filename: 'server.js',
+      filename: `${target}.js`,
       chunkFilename: '[id].js',
       pathinfo: false,
       libraryTarget: 'commonjs2'
@@ -36,12 +31,6 @@ export const serverConfig = (env: WebpackConfig) => {
         }
       ]
     },
-    plugins: [
-      _prod_ &&
-        new UniversalStatsPlugin({
-          env: 'server',
-          module: true
-        })
-    ].filter(Boolean)
+    plugins: [].filter(Boolean)
   } as webpack.Configuration
 }
