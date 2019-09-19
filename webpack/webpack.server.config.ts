@@ -11,11 +11,12 @@ export const serverConfig = (env: WebpackConfig) => {
     entry: './src/server/entry.ts',
     output: {
       path: resolve(path, 'server/'),
-      filename: _prod_ ? `${target}.[hash].js` : `${target}.js`,
-      chunkFilename: _prod_ ? '[id].[hash].js' : '[id].js',
+      filename: `${target}.js`,
+      chunkFilename: '[id].js',
       pathinfo: _prod_,
       libraryTarget: 'commonjs2'
     },
+    target: 'node',
     module: {
       rules: [
         {
@@ -23,7 +24,6 @@ export const serverConfig = (env: WebpackConfig) => {
           test: /\.css$/i,
           exclude: /node_modules/,
           use: [
-            _prod_ && 'cache-loader',
             {
               loader: 'css-loader',
               options: {

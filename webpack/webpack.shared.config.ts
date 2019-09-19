@@ -28,7 +28,6 @@ export const sharedConfig = (env: WebpackConfig) => {
           test: /\.tsx?$/,
           exclude: /node_modules/,
           use: [
-            _prod_ && 'cache-loader',
             {
               loader: 'ts-loader',
               options: {

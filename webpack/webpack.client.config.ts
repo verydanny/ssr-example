@@ -52,7 +52,6 @@ export const clientConfig = (env: WebpackConfig) => {
           test: /\.css$/i,
           exclude: /node_modules/,
           use: [
-            _prod_ && 'cache-loader',
             {
               loader: MiniCssExtractPlugin.loader,
               options: {
