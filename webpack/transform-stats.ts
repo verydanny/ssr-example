@@ -53,7 +53,7 @@ function makeModule(isModule: boolean, jsonString: string) {
 }
 
 function makeFilename(isModule: boolean, filename?: string) {
-  return isModule && filename ? `${filename}.js` : `${filename}.json}`
+  return isModule && filename ? `${filename}.js` : `${filename}.json`
 }
 
 function buildStats(

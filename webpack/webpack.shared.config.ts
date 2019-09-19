@@ -1,7 +1,6 @@
 import webpack from 'webpack'
 import { CleanWebpackPlugin } from 'clean-webpack-plugin'
 import { UniversalStatsPlugin } from './transform-stats'
-import { warmup } from 'thread-loader'
 
 import { WebpackConfig } from '../types/webpack-config'
 
@@ -11,10 +10,6 @@ export const sharedConfig = (env: WebpackConfig) => {
   const _server_ = target === 'server'
   const _prod_ = mode === 'production'
   const _dev_ = mode === 'development'
-
-  if (_prod_) {
-    warmup({}, ['ts-loader'])
-  }
 
   return {
     name: target,
@@ -33,13 +28,12 @@ export const sharedConfig = (env: WebpackConfig) => {
           test: /\.tsx?$/,
           exclude: /node_modules/,
           use: [
-            _prod_ && 'thread-loader',
+            _prod_ && 'cache-loader',
             {
               loader: 'ts-loader',
               options: {
                 // disable type checker - we will use it in fork plugin
-                transpileOnly: true,
-                happyPackMode: _prod_
+                transpileOnly: true
               }
             }
           ].filter(Boolean)
@@ -51,8 +45,7 @@ export const sharedConfig = (env: WebpackConfig) => {
       namedModules: false,
       removeEmptyChunks: _prod_,
       mergeDuplicateChunks: _prod_,
-      providedExports: _prod_,
-      splitChunks: _prod_
+      providedExports: _prod_
     },
     plugins: [
       new CleanWebpackPlugin(),

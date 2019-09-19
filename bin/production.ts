@@ -11,6 +11,16 @@ const env = {
   path: resolve(process.cwd(), 'dist')
 } as const
 
+const clientEnv = {
+  ...env,
+  target: 'client' as const
+}
+
+const serverEnv = {
+  ...env,
+  target: 'server' as const
+}
+
 const defaultStatsOptions = {
   assets: true,
   children: false,
@@ -24,8 +34,15 @@ const defaultStatsOptions = {
   entrypoints: false
 }
 
-const clientConfigMerged = webpackMerge(sharedConfig(env), clientConfig(env))
-const serverConfigMerged = webpackMerge(sharedConfig(env), serverConfig(env))
+const clientConfigMerged = webpackMerge.smart(
+  sharedConfig(clientEnv),
+  clientConfig(clientEnv)
+)
+
+const serverConfigMerged = webpackMerge(
+  sharedConfig(serverEnv),
+  serverConfig(serverEnv)
+)
 
 const compiler = universalCompiler(clientConfigMerged, serverConfigMerged)
 

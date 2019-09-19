@@ -18,10 +18,10 @@ export const clientConfig = (env: WebpackConfig) => {
     ].filter(Boolean),
     output: {
       path: resolve(path, 'client/'),
-      filename: `${target}.js`,
+      filename: _prod_ ? `${target}.[hash].js` : `${target}.js`,
       publicPath: '/assets/',
-      chunkFilename: '[name].[id].js',
-      pathinfo: false,
+      chunkFilename: _prod_ ? '[name].[id].[hash].js' : '[name].[id].js',
+      pathinfo: _prod_,
       hotUpdateMainFilename: 'hot-update.json',
       hotUpdateChunkFilename: '[id].hot-update.js'
     },
@@ -39,12 +39,6 @@ export const clientConfig = (env: WebpackConfig) => {
                 test: /node_modules\/react-dom\//,
                 name: 'react-dom',
                 priority: 10
-              },
-              core: {
-                test: /node_modules/,
-                name: 'core',
-                chunks: 'all',
-                minSize: 0
               }
             }
           }
@@ -56,7 +50,9 @@ export const clientConfig = (env: WebpackConfig) => {
         {
           // For CSS modules
           test: /\.css$/i,
+          exclude: /node_modules/,
           use: [
+            _prod_ && 'cache-loader',
             {
               loader: MiniCssExtractPlugin.loader,
               options: {
@@ -69,7 +65,7 @@ export const clientConfig = (env: WebpackConfig) => {
                 modules: true
               }
             }
-          ]
+          ].filter(Boolean)
         }
       ]
     },
@@ -79,8 +75,8 @@ export const clientConfig = (env: WebpackConfig) => {
       new MiniCssExtractPlugin({
         // Options similar to the same options in webpackOptions.output
         // all options are optional
-        filename: 'client.css',
-        chunkFilename: '[id].css',
+        filename: _prod_ ? 'client.[hash].css' : 'client.css',
+        chunkFilename: _prod_ ? '[id].[hash].css' : '[id].css',
         ignoreOrder: false // Enable to remove warnings about conflicting order
       })
     ].filter(Boolean)
