@@ -50,7 +50,7 @@ export const serverRenderer = (
       <!DOCTYPE html>
       <html>
         <head>
-          <title>Apps</title>
+          <title>Nice</title>
           ${entrypoint.css
             .map(
               (chunk: string) =>

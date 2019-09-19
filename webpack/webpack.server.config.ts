@@ -14,6 +14,8 @@ export const serverConfig = (env: WebpackConfig) => {
       filename: `${target}.js`,
       chunkFilename: '[id].js',
       pathinfo: _prod_,
+      hotUpdateMainFilename: 'hot-update.json',
+      hotUpdateChunkFilename: '[id].hot-update.js',
       libraryTarget: 'commonjs2'
     },
     target: 'node',
@@ -35,6 +37,6 @@ export const serverConfig = (env: WebpackConfig) => {
         }
       ]
     },
-    plugins: [].filter(Boolean)
+    plugins: [_dev_ && new webpack.HotModuleReplacementPlugin()].filter(Boolean)
   } as webpack.Configuration
 }
