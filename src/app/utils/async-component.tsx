@@ -83,7 +83,8 @@ export function asyncComponent<
 >(
   importComponent: () => Promise<Exports>,
   webpack: () => string | number,
-  exportName: K | 'default' = 'default'
+  exportName: K | 'default' = 'default',
+  isStatic: boolean
 ) {
   let res: LoadInterface
 
@@ -174,7 +175,7 @@ export function asyncComponent<
           <Consumer>
             {({ updateChunk }) => {
               if (typeof updateChunk === 'function') {
-                updateChunk(webpack)
+                updateChunk(webpack, isStatic)
               }
 
               if (typeof this.state.loaded === 'object') {

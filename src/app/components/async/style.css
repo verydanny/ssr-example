@@ -1,5 +1,9 @@
-.bigAsync {
+.foo {
   color: rgb(6, 60, 95);
   font-size: 4rem;
   font-family: 'Comic Sans', 'Comic Sans MS', Arial;
+}
+
+.fooTwo {
+  color: orange;
 }

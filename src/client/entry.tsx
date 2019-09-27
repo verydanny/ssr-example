@@ -1,7 +1,7 @@
 import React from 'react'
 import { hydrate } from 'react-dom'
 import App from '../app/containers/app'
-import { preloadReady } from '../utils/async-component'
+import { preloadReady } from '../app/utils/async-component'
 
 import './global.css'
 

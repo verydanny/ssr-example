@@ -70,7 +70,10 @@ export const clientConfig = (env: WebpackConfig) => {
     },
     plugins: [
       _dev_ && new webpack.HotModuleReplacementPlugin(),
-      _prod_ && new CompressionPlugin(),
+      _prod_ &&
+        new CompressionPlugin({
+          exclude: /\.map$/
+        }),
       new MiniCssExtractPlugin({
         // Options similar to the same options in webpackOptions.output
         // all options are optional

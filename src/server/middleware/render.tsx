@@ -1,9 +1,15 @@
 import React from 'react'
 import { renderToString } from 'react-dom/server'
 import App from '../../app/containers/app'
-import { AsyncChunkProvider } from '../../utils/async-provider'
+import { AsyncChunkProvider } from '../../app/utils/async-provider'
+import { HydrationManager, HydrationContext } from '../../app/partial-hydrate'
 
 import { Response, Request, NextFunction } from 'express'
+
+interface EntryPoint {
+  js: string[]
+  css: string[]
+}
 
 export const serverRenderer = (
   req: Request,
@@ -13,10 +19,11 @@ export const serverRenderer = (
   if (req.method === 'GET' && req.path === '/') {
     const moduleIds = res.locals.serverStats
     const { publicPath, entry, ...stats } = res.locals.clientStats
-    const entrypoint = entry.main
+    const entrypoint: EntryPoint = entry.main
     const chunkJS: string[] = []
     const chunkCSS: string[] = []
     const hotUpdateRegex = /.*\.hot-update.*\.js$/
+    const hydrationManager = new HydrationManager()
 
     const getClientFiles = (id: string | number) => {
       if (moduleIds[id]) {
@@ -28,13 +35,13 @@ export const serverRenderer = (
       return undefined
     }
 
-    const sortModules = (webpack: () => string | number) => {
+    const sortModules = (webpack: () => string | number, isStatic: boolean) => {
       const { files } = getClientFiles(webpack())
 
       if (files.js || files.css) {
-        const filterHot = files.js.filter(
-          (file: string) => !hotUpdateRegex.test(file)
-        )
+        const filterHot = isStatic
+          ? []
+          : files.js.filter((file: string) => !hotUpdateRegex.test(file))
         chunkJS.push(...filterHot)
         chunkCSS.push(...files.css)
       }
@@ -42,7 +49,9 @@ export const serverRenderer = (
 
     const body = renderToString(
       <AsyncChunkProvider updateChunk={sortModules}>
-        <App />
+        <HydrationContext.Provider value={hydrationManager}>
+          <App />
+        </HydrationContext.Provider>
       </AsyncChunkProvider>
     )
 
@@ -73,6 +82,7 @@ export const serverRenderer = (
             )
             .join('')}
           ${entrypoint.js
+            .filter((file: string) => !hotUpdateRegex.test(file))
             .map(
               (chunk: string) =>
                 `<script src="${publicPath}${String(chunk)}" async></script>`

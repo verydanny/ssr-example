@@ -2,14 +2,10 @@ import React from 'react'
 import { Provider } from './async-context'
 
 interface Props {
-  updateChunk: (webpack: () => string | number) => void
+  updateChunk: (webpack: () => string | number, isStatic: boolean) => void
 }
 
 export class AsyncChunkProvider extends React.Component<Props> {
-  constructor(props: Props) {
-    super(props)
-  }
-
   render() {
     return (
       <Provider
