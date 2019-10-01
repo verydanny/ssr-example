@@ -29,7 +29,8 @@ module.exports = {
       singleQuote: true,
       semi: false,
       bracketSpacing: true
-    }]
+    }],
+    'react/prop-types': 0
   },
   overrides: [
     {

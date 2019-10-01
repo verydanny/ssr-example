@@ -1,4 +1,5 @@
 import { HYDRATE_CONST } from './const'
+import { isServer } from '../utils/is-server'
 
 const DEFAULT_ID = '_constId'
 const DEFAULT_PRE = 'hydro_'
@@ -7,7 +8,7 @@ export const EFFECT_ID = Symbol('react-hydrate')
 
 export class HydrationManager {
   hydrated = false
-
+  isServer = isServer
   private hydration: { [x: string]: string } = {}
   private ids: { [x: string]: number } = {}
 

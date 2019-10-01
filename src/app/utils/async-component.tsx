@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/camelcase */
 import React from 'react'
 import { Consumer } from './async-context'
+import { isServer } from '../utils/is-server'
 
 type GetProps<T> = T extends React.ComponentType<infer P> ? P : never
 
@@ -84,7 +85,7 @@ export function asyncComponent<
   importComponent: () => Promise<Exports>,
   webpack: () => string | number,
   exportName: K | 'default' = 'default',
-  isStatic: boolean
+  isStatic = false
 ) {
   let res: LoadInterface
 

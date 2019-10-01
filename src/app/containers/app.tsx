@@ -1,7 +1,6 @@
 import React from 'react'
-import { Counter } from '../components/counter/counter'
 import { asyncComponent } from '../utils/async-component'
-import { StaticContent, HydrationTracker } from '../partial-hydrate'
+import { StaticContent, DeferHydrateToClient } from '../partial-hydrate'
 
 const HelloWorldAsync = asyncComponent(
   () =>
@@ -13,14 +12,21 @@ const HelloWorldAsync = asyncComponent(
   true
 )
 
+const Counter = asyncComponent(
+  () =>
+    import(/* webpackChunkName: "Counter" */ '../components/counter/counter'),
+  () => require.resolveWeak('../components/hello-world/hello-world'),
+  'Counter'
+)
+
+const CounterClient = DeferHydrateToClient(Counter)
 const HelloWorld = StaticContent(HelloWorldAsync)
 
 const App = () => {
   return (
     <div className="app-container">
-      <HydrationTracker />
-      <HelloWorld name="bingus" />
-      <Counter />
+      <CounterClient />
+      <HelloWorld name="Daniel" />
     </div>
   )
 }
