@@ -1,25 +1,25 @@
 import React from 'react'
 import { asyncComponent } from '../utils/async-component'
-import { StaticContent, DeferHydrateToClient } from '../partial-hydrate'
+import { StaticContent } from '../partial-hydrate'
+import { importClientDeferred } from '../partial-hydrate/defer-to-client'
 
-const HelloWorldAsync = asyncComponent(
-  () =>
+const HelloWorldAsync = asyncComponent({
+  importComponent: () =>
     import(
       /* webpackChunkName: "HelloWorld" */ '../components/hello-world/hello-world'
     ),
-  () => require.resolveWeak('../components/hello-world/hello-world'),
-  'HelloWorld',
-  true
-)
+  webpack: () => require.resolveWeak('../components/hello-world/hello-world'),
+  exportName: 'HelloWorld',
+  isStatic: true
+})
 
-const Counter = asyncComponent(
-  () =>
+const CounterClient = importClientDeferred({
+  importComponent: () =>
     import(/* webpackChunkName: "Counter" */ '../components/counter/counter'),
-  () => require.resolveWeak('../components/hello-world/hello-world'),
-  'Counter'
-)
+  webpack: () => require.resolveWeak('../components/counter/counter'),
+  exportName: 'Counter'
+})
 
-const CounterClient = DeferHydrateToClient(Counter)
 const HelloWorld = StaticContent(HelloWorldAsync)
 
 const App = () => {

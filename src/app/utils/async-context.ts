@@ -1,5 +1,7 @@
 import React from 'react'
 
-export const { Provider, Consumer } = React.createContext({
+export const AsyncChunkContext = React.createContext({
   updateChunk: (webpack: () => string | number, isStatic: boolean) => {}
 })
+
+export const { Consumer, Provider } = AsyncChunkContext

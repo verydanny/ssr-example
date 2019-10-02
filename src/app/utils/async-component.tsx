@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/camelcase */
 import React from 'react'
 import { Consumer } from './async-context'
-import { isServer } from '../utils/is-server'
 
 type GetProps<T> = T extends React.ComponentType<infer P> ? P : never
 
@@ -71,6 +70,11 @@ function isWebpackReady(webpack: () => string | number) {
 
 const LoadingComp = () => <div>Loading...</div>
 
+// importComponent: () => Promise<Exports>,
+// webpack: () => string | number,
+// exportName: K | 'default' = 'default',
+// isStatic = false
+
 /**
  *
  * @param importComponent - A function that returns a promise with the React.Component
@@ -81,12 +85,17 @@ export function asyncComponent<
   Exports extends object,
   K extends keyof ResolvedPromise<Exports>,
   Props = GetProps<Exports[K]>
->(
-  importComponent: () => Promise<Exports>,
-  webpack: () => string | number,
-  exportName: K | 'default' = 'default',
-  isStatic = false
-) {
+>({
+  importComponent,
+  webpack,
+  exportName,
+  isStatic
+}: {
+  importComponent: () => Promise<Exports>
+  webpack: () => string | number
+  exportName: K | 'default'
+  isStatic?: boolean
+}) {
   let res: LoadInterface
 
   function init() {
@@ -224,8 +233,9 @@ export const preloadAll = () =>
     flushInitializers(ALL_ASYNC).then(resolve, reject)
   })
 
-export const preloadReady = () =>
-  new Promise(resolve => {
+export const preloadReady = () => {
+  return new Promise(resolve => {
     // We always will resolve, errors should be handled within loading UIs.
     flushInitializers(ON_DEMAND_ASYNC).then(resolve, resolve)
   })
+}
