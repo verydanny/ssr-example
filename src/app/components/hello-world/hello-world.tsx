@@ -1,6 +1,5 @@
 import React from 'react'
 import style from './style.css'
-import { StaticOne } from '../static-components/static-one'
 
 export const HelloWorld = ({ name }: { name: string }) => (
   <div>
@@ -11,6 +10,5 @@ export const HelloWorld = ({ name }: { name: string }) => (
       I&apos;m not being <strong>hydrated</strong> because server already did
       that work
     </p>
-    <StaticOne name="Orion" />
   </div>
 )

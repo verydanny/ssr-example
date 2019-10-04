@@ -1,8 +1,8 @@
 import React from 'react'
 import { renderToString } from 'react-dom/server'
 import App from '../../app/containers/app'
-import { AsyncChunkProvider } from '../../app/utils/async-provider'
-import { HydrationManager, HydrationContext } from '../../app/partial-hydrate'
+import { AsyncChunkProvider } from '../../lib/async/async-provider'
+import { HydrationManager, HydrationContext } from '../../lib/partial-hydrate'
 
 import { Response, Request, NextFunction } from 'express'
 

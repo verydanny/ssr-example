@@ -1,26 +1,25 @@
 {
 	"compilerOptions": {
-		"module": "esnext",
+		"module": "commonjs",
 		"target": "esnext",
-		"outDir": "lib",
 		"lib": [
 			"dom",
 			"dom.iterable",
 			"esnext"
 		],
+		"esModuleInterop": true,
+		"allowSyntheticDefaultImports": true,
+		"emitDeclarationOnly": true,
+		"declaration": true,
 		"moduleResolution": "node",
 		"jsx": "react",
 		"strict": true,
 		"noImplicitReturns": true,
 		"noUnusedLocals": true,
 		"noImplicitAny": true,
-		"strictFunctionTypes": false,
-		"esModuleInterop": true,
+		"strictFunctionTypes": true,
 		"sourceMap": true,
-		"skipLibCheck": true,
-		"skipDefaultLibCheck": true,
-		"downlevelIteration": true,
-		"importHelpers": true
+		"downlevelIteration": true
 	},
 	"exclude": [
 		"node_modules",

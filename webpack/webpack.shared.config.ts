@@ -26,16 +26,18 @@ export const sharedConfig = (env: WebpackConfig) => {
       rules: [
         {
           test: /\.tsx?$/,
+          loader: 'babel-loader',
           exclude: /node_modules/,
-          use: [
-            {
-              loader: 'ts-loader',
-              options: {
-                // disable type checker - we will use it in fork plugin
-                transpileOnly: true
-              }
-            }
-          ].filter(Boolean)
+          options: {
+            cacheDirectory: true,
+            envName: _client_
+              ? _dev_
+                ? 'development_client'
+                : 'production_client'
+              : _server_ && _dev_
+              ? 'development_server'
+              : 'production_server'
+          }
         }
       ]
     },
