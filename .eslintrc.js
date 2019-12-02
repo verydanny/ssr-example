@@ -44,9 +44,13 @@ module.exports = {
         'prettier/@typescript-eslint',
       ],
       rules: {
+        '@typescript-eslint/camelcase': 0,
         '@typescript-eslint/explicit-function-return-type': 0,
-        '@typescript-eslint/no-explicit-any': 0,
         '@typescript-eslint/no-use-before-define': 0,
+        '@typescript-eslint/no-unused-vars': ['error', {
+          args: 'after-used',
+          argsIgnorePattern: '^_'
+        }]
       },
     }
   ]

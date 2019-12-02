@@ -48,6 +48,23 @@ const middleware = universalMiddleware(clientConfigMerged, serverConfigMerged, {
 app.use(middleware)
 
 app.use(
+  (
+    _req: express.Request,
+    res: express.Response,
+    next: express.NextFunction
+  ) => {
+    if (res.locals.universal && res.locals.universal.compilation) {
+      const { clientStats, serverStats } = res.locals.universal.compilation
+
+      res.locals.clientStats = buildDevStats(clientStats.compilation, 'client')
+      res.locals.serverStats = buildDevStats(serverStats.compilation, 'server')
+    }
+
+    next()
+  }
+)
+
+app.use(
   (req: express.Request, res: express.Response, next: express.NextFunction) => {
     if (res.locals.universal && res.locals.universal.bundle) {
       // middleware is the name of my server entryPoint export
@@ -59,23 +76,6 @@ app.use(
       preloadAll().then(() => {
         compose(middleware)(req, res, next)
       })
-    }
-
-    next()
-  }
-)
-
-app.use(
-  (
-    _req: express.Request,
-    res: express.Response,
-    next: express.NextFunction
-  ) => {
-    if (res.locals.universal && res.locals.universal.compilation) {
-      const { clientStats, serverStats } = res.locals.universal.compilation
-
-      res.locals.clientStats = buildDevStats(clientStats.compilation, 'client')
-      res.locals.serverStats = buildDevStats(serverStats.compilation, 'server')
     }
 
     next()

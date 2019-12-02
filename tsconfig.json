@@ -1,7 +1,7 @@
 {
 	"compilerOptions": {
 		"module": "commonjs",
-		"target": "esnext",
+		"target": "es2018",
 		"lib": [
 			"dom",
 			"dom.iterable",
@@ -9,7 +9,7 @@
 		],
 		"esModuleInterop": true,
 		"allowSyntheticDefaultImports": true,
-		"emitDeclarationOnly": true,
+		"noEmit": true,
 		"declaration": true,
 		"moduleResolution": "node",
 		"jsx": "react",
@@ -30,6 +30,7 @@
 		"bin",
 		"src",
 		"types",
-		"webpack"
+		"webpack",
+		"babel/babel-plugin.ts"
 	]
 }

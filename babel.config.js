@@ -1,11 +1,23 @@
 module.exports = api => {
-  const isServerDev = api.env() === 'development_server'
-  const isServerProd = api.env() === 'production_server'
-  const isClientDev = api.env() === 'development_client'
-  const isClientProd = api.env() === 'production_client'
+  const env = api.env()
+  const isServerDev = env === 'development_server'
+  const isServerProd = env === 'production_server'
+  const isClientDev = env === 'development_client'
+  const isClientProd = env === 'production_client'
+  const isTest = env === 'test'
+
+  api.cache.using(() => isTest || isClientDev || isServerDev)
 
   return {
     presets: [
+      isTest && [
+        '@babel/preset-env',
+        {
+          targets: {
+            node: 'current'
+          }
+        }
+      ],
       (isServerDev || isServerProd) && [
         '@babel/preset-env',
         {
@@ -28,9 +40,13 @@ module.exports = api => {
         '@babel/preset-env',
         {
           targets: {
-            browsers: 'last 2 Chrome versions'
+            browsers: '>1%, not dead, not ie 11, not op_mini all'
           },
-          modules: false
+          loose: true,
+          modules: false,
+          useBuiltIns: 'usage',
+          corejs: 3,
+          shippedProposals: true
         }
       ],
       '@babel/preset-typescript',
@@ -38,8 +54,11 @@ module.exports = api => {
     ].filter(Boolean),
     plugins: [
       (isClientDev || isClientProd) && '@babel/plugin-syntax-dynamic-import',
-      (isServerDev || isServerProd) && 'babel-plugin-dynamic-import-node',
-      ['@babel/plugin-proposal-class-properties', { loose: true }]
+      (isServerDev || isServerProd || isTest) &&
+        'babel-plugin-dynamic-import-node',
+      ['@babel/plugin-proposal-class-properties', { loose: true }],
+      ['@babel/plugin-proposal-nullish-coalescing-operator', { loose: true }],
+      ['@babel/plugin-proposal-optional-chaining', { loose: true }]
     ].filter(Boolean)
   }
 }

@@ -1,4 +1,5 @@
 import webpack from 'webpack'
+import * as path from 'path'
 import { CleanWebpackPlugin } from 'clean-webpack-plugin'
 import { UniversalStatsPlugin } from './transform-stats'
 
@@ -28,8 +29,9 @@ export const sharedConfig = (env: WebpackConfig) => {
           test: /\.tsx?$/,
           loader: 'babel-loader',
           exclude: /node_modules/,
+          include: path.resolve(__dirname, '../src'),
           options: {
-            cacheDirectory: true,
+            cacheDirectory: false,
             envName: _client_
               ? _dev_
                 ? 'development_client'
@@ -38,12 +40,31 @@ export const sharedConfig = (env: WebpackConfig) => {
               ? 'development_server'
               : 'production_server'
           }
+        },
+        {
+          test: /\.svg$/,
+          exclude: /node_modules/,
+          use: [
+            'svg-sprite-loader',
+            {
+              loader: 'svgo-loader',
+              options: {
+                plugins: [
+                  { removeAttrs: { attrs: 'fill' } },
+                  { removeTitle: true },
+                  { removeStyleElement: true },
+                  { removeXMLNS: true },
+                  { removeUselessStrokeAndFill: false }
+                ]
+              }
+            }
+          ]
         }
       ]
     },
     optimization: {
       namedChunks: false,
-      namedModules: false,
+      namedModules: true,
       removeEmptyChunks: _prod_,
       mergeDuplicateChunks: _prod_,
       providedExports: _prod_

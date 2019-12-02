@@ -33,10 +33,17 @@ interface WebpackStubbedModule {
   chunkGroupFiles?: Files
 }
 
+interface WebpackStubbedRawModule {
+  id: number
+  name: string
+  raw: string
+}
+
 interface Stats {
   [x: string]: {
     name?: string
     files?: Files
+    raw?: string
     chunkGroupFiles?: Files
   }
 }
@@ -63,7 +70,9 @@ function buildStats(
   const { chunkGroups, modules } = compilation
   const entry: Entry = {}
   const moduleArray: WebpackStubbedModule[] = []
+  const rawModuleArray: WebpackStubbedRawModule[] = []
   const stats: Stats = {}
+  const rawStats: Stats = {}
 
   for (const chunkGroup of chunkGroups) {
     const getChunkGroupFiles = chunkGroup.getFiles()
@@ -87,24 +96,41 @@ function buildStats(
         }
 
         for (const module of modulesInCurrentChunk) {
-          if (module.rawRequest) {
+          if (module.userRequest) {
             moduleArray.push({
               id: module.id,
-              name: module.rawRequest,
+              name: module.userRequest,
               chunkGroupFiles,
               files
             })
+
+            if (module.rawRequest) {
+              rawModuleArray.push({
+                id: module.id,
+                raw: module.rawRequest,
+                name: module.userRequest
+              })
+            }
           }
           if (
-            !module.rawRequest &&
+            !module.userRequest &&
+            module.rootModule &&
             module.constructor.name === 'ConcatenatedModule'
           ) {
             moduleArray.push({
               id: module.id,
-              name: module.rootModule.rawRequest,
+              name: module.rootModule.userRequest,
               chunkGroupFiles,
               files
             })
+
+            if (module.rootModule.rawRequest) {
+              rawModuleArray.push({
+                id: module.id,
+                name: module.rootModule.userRequest,
+                raw: module.rootModule.rawRequest
+              })
+            }
           }
         }
       }
@@ -112,19 +138,20 @@ function buildStats(
 
     if (env === 'server') {
       for (const module of modules) {
-        if (module.rawRequest) {
+        if (module.userRequest) {
           moduleArray.push({
             id: module.id,
-            name: module.rawRequest
+            name: module.userRequest
           })
         }
+
         if (
-          !module.rawRequest &&
+          !module.userRequest &&
           module.constructor.name === 'ConcatenatedModule'
         ) {
           moduleArray.push({
             id: module.id,
-            name: module.rootModule.rawRequest
+            name: module.rootModule.userRequest
           })
         }
       }
@@ -132,10 +159,15 @@ function buildStats(
   }
 
   if (env === 'client') {
-    for (const { name, files, chunkGroupFiles } of moduleArray) {
+    for (const { name, files } of moduleArray) {
       stats[name] = {
-        files: files ? files : { js: [], css: [] },
-        chunkGroupFiles: chunkGroupFiles ? chunkGroupFiles : { js: [], css: [] }
+        files: files ? files : { js: [], css: [] }
+      }
+    }
+
+    for (const { name, raw } of rawModuleArray) {
+      rawStats[raw] = {
+        name
       }
     }
   }
@@ -148,14 +180,14 @@ function buildStats(
     }
   }
 
-  return { entry, stats }
+  return { entry, stats, rawStats }
 }
 
 export const buildDevStats = (
   compilation: webpack.compilation.Compilation,
   env: 'client' | 'server'
 ) => {
-  const { entry, stats } = buildStats(compilation, env)
+  const { entry, stats, rawStats } = buildStats(compilation, env)
 
   if (env === 'client') {
     return {
@@ -168,10 +200,13 @@ export const buildDevStats = (
           ? compilation.compiler.options.output.publicPath
           : '/',
       statsEnv: env,
-      ...stats
+      stats,
+      rawStats
     }
-  } else {
-    return stats
+  }
+
+  return {
+    stats
   }
 }
 
@@ -198,8 +233,10 @@ export class UniversalStatsPlugin {
     compiler.hooks.emit.tapAsync(
       'UniversalStatsPlugin',
       (compilation, callback) => {
-        const { entry, stats } = buildStats(compilation, this.options
-          .env as any)
+        const { entry, stats, rawStats } = buildStats(
+          compilation,
+          this.options.env as any
+        )
 
         const statsString = JSON.stringify({
           entry,
@@ -207,7 +244,8 @@ export class UniversalStatsPlugin {
             ? compiler.options.output.publicPath
             : undefined,
           statsEnv: this.options.env,
-          ...stats
+          stats,
+          rawStats
         })
         const statsModule = makeModule(this.options.module, statsString)
         const statsFilename = makeFilename(

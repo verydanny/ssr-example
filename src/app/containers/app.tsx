@@ -1,17 +1,14 @@
 import React from 'react'
-import { asyncComponent } from '../../lib/async/async-component'
-import { StaticContent } from '../../lib/partial-hydrate'
+import { Routes } from '../routes/routes'
 
-const HelloWorldAsync = asyncComponent({
-  importComponent: () => import('../components/hello-world/hello-world'),
-  webpack: () => require.resolveWeak('../components/hello-world/hello-world'),
-  exportName: 'HelloWorld'
-})
+interface AppProps {
+  context: object
+}
 
-const App = () => {
+const App = ({ context }: AppProps) => {
   return (
     <div className="app-container">
-      <HelloWorldAsync name="Dan" />
+      <Routes />
     </div>
   )
 }

@@ -1,6 +1,7 @@
 import webpack from 'webpack'
 import { WebpackConfig } from '../types/webpack-config'
 import { resolve } from 'path'
+import nodeExternals from 'webpack-node-externals'
 
 export const serverConfig = (env: WebpackConfig) => {
   const { path, target, mode } = env
@@ -18,6 +19,11 @@ export const serverConfig = (env: WebpackConfig) => {
       hotUpdateChunkFilename: '[id].hot-update.js',
       libraryTarget: 'commonjs2'
     },
+    externals: [
+      nodeExternals({
+        whitelist: ['webpack/hot']
+      })
+    ],
     target: 'node',
     module: {
       rules: [
