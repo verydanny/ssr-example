@@ -1,7 +1,8 @@
 import React, { useEffect } from 'react'
 
+import { createLoader } from './asyncLoader'
 import { useAsyncHook } from './asyncHooks'
-import { createLoader, DynamicImport } from './asyncLoader'
+import { DynamicImport } from './types'
 
 type GetProps<T> = T extends React.ComponentType<infer P> ? P : never
 
@@ -9,6 +10,7 @@ interface AsyncComponentOptions<ExportKeys, Props> {
   Loading?(props: Props): React.ReactNode
   exportName?: ExportKeys | 'default'
   isStatic?: boolean
+  displayName?: string
 }
 
 /**
@@ -26,15 +28,16 @@ export function makeAsyncComponent<
   {
     Loading = defaultRender,
     exportName = 'default',
-    isStatic = false
+    isStatic = false,
+    displayName = ''
   }: AsyncComponentOptions<K, Props> = {
     exportName: 'default',
     isStatic: false
   }
-): React.ComponentType<Props> {
+) {
   const loaderState = createLoader(load, id)
 
-  return function AsyncComponent(props: Props) {
+  function AsyncComponent(props: Props) {
     const { load, resolved: Component, loading, error } = useAsyncHook(
       loaderState,
       isStatic
@@ -48,14 +51,14 @@ export function makeAsyncComponent<
     const rendered = ComponentNormalized ? (
       <ComponentNormalized {...props} />
     ) : null
+
     let loadingElement: React.ReactNode | null = null
     let markupContent: React.ReactNode | null = null
 
-    loadingElement = <Loader load={load} props={props} />
-
     if (loading) {
       markupContent = Loading(props)
-    } else if (rendered && !error) {
+      loadingElement = <Loader load={load} props={props} />
+    } else if (!loading && rendered && !error) {
       markupContent = rendered
     }
 
@@ -66,6 +69,12 @@ export function makeAsyncComponent<
       </>
     )
   }
+
+  AsyncComponent.displayName = `${
+    displayName ? displayName : exportName ? exportName : 'Anonymous'
+  }.AsyncComponent`
+
+  return React.memo(AsyncComponent)
 }
 
 function Loader<T>({ load, props }: { load(): void; props: T }) {

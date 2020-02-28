@@ -15,14 +15,6 @@ export const sharedConfig = (env: WebpackConfig) => {
   return {
     name: target,
     mode,
-    devtool:
-      _dev_ && _server_
-        ? 'inline-source-map'
-        : _prod_ && _server_
-        ? 'source-map'
-        : _dev_ && _client_
-        ? 'cheap-module-eval-source-map'
-        : 'source-map',
     module: {
       rules: [
         {
@@ -63,8 +55,6 @@ export const sharedConfig = (env: WebpackConfig) => {
       ]
     },
     optimization: {
-      namedChunks: false,
-      namedModules: true,
       removeEmptyChunks: _prod_,
       mergeDuplicateChunks: _prod_,
       providedExports: _prod_
@@ -77,7 +67,11 @@ export const sharedConfig = (env: WebpackConfig) => {
       })
     ].filter(Boolean),
     resolve: {
-      extensions: ['.tsx', '.ts', '.js']
+      extensions: ['.tsx', '.ts', '.js'],
+      alias: {
+        'react-dom$': 'react-dom/profiling',
+        'scheduler/tracing': 'scheduler/tracing-profiling'
+      }
     }
   } as webpack.Configuration
 }

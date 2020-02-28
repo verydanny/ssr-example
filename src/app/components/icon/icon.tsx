@@ -10,24 +10,39 @@ interface IconProps {
 export const Icon = ({ name }: IconProps) => {
   const AssetManager = React.useContext(AssetContext)
   const IconModule = makeAsyncModule(
-    () => import(/* webpackChunkName: "icon-[request]" */ `./svgs/${name}.svg`),
+    () => import(`./svgs/${name}.svg`),
     () => require.resolveWeak(`./svgs/${name}.svg`),
     {
-      isStatic: true
+      isStatic: true,
+      displayName: `SVGIcon_${name}`
     }
   )
 
-  const IconComponent = StaticContent(() => (
+  const StaticIcon = () => (
     <IconModule.AssetProvider>
       <IconModule.AssetConsumer>
         {icon => {
-          const svg = AssetManager.storeAsset(name, icon)
+          if (icon) {
+            AssetManager.storeAsset(name, icon)
+          }
 
-          return <svg viewBox={svg.viewBox}><use xlinkHref={`#${svg.id}`}></use></svg>
+          return (
+            <svg
+              dangerouslySetInnerHTML={{
+                __html: `<use xlink:href="#${name}"></use>`
+              }}
+            />
+          )
         }}
       </IconModule.AssetConsumer>
     </IconModule.AssetProvider>
-  ))
+  )
 
-  return <IconComponent />
+  StaticIcon.displayName = 'StaticIcon'
+
+  const StaticWrapper = StaticContent(StaticIcon)
+
+  return <StaticWrapper />
 }
+
+Icon.displayName = `SVGIcon`

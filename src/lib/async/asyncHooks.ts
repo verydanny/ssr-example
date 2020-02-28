@@ -3,12 +3,14 @@ import { useContext, useState, useCallback } from 'react'
 import { useMountedRef } from '../hooks/useMounted'
 import { AsyncChunkContext } from './asyncContext'
 
+import { CreateLoader } from './types'
+
 export function useAsyncChunkContext() {
   return useContext(AsyncChunkContext)
 }
 
 export function useAsyncHook<T>(
-  loaderState: import('./asyncLoader').CreateLoader<T>,
+  loaderState: CreateLoader<T>,
   isStatic: boolean
 ) {
   const [value, setValue] = useState<T | Error | null>(() =>
@@ -38,13 +40,17 @@ export function useAsyncHook<T>(
     }
   }, [mounted, loaderState, value])
 
-  const { id } = loaderState
-
   if (loaderState.id) {
     asyncChunkManager.recordChunk(loaderState.id, isStatic)
   }
 
   return value instanceof Error
-    ? { id, resolved: null, error: value, loading: false, load }
-    : { id, resolved: value, error: null, loading: value == null, load }
+    ? { id: loaderState.id, resolved: null, error: value, loading: false, load }
+    : {
+        id: loaderState.id,
+        resolved: value,
+        error: null,
+        loading: value == null,
+        load
+      }
 }

@@ -10,12 +10,14 @@ module.exports = api => {
 
   return {
     presets: [
+      // Server
       isTest && [
         '@babel/preset-env',
         {
           targets: {
             node: 'current'
-          }
+          },
+          exclude: ['transform-async-to-generator', 'transform-regenerator']
         }
       ],
       (isServerDev || isServerProd) && [
@@ -24,15 +26,19 @@ module.exports = api => {
           targets: {
             node: 'current'
           },
+          exclude: ['transform-async-to-generator', 'transform-regenerator'],
           modules: false
         }
       ],
+
+      // Client
       isClientDev && [
         '@babel/preset-env',
         {
           targets: {
             browsers: 'last 2 Chrome versions'
           },
+          exclude: ['transform-async-to-generator', 'transform-regenerator'],
           modules: false
         }
       ],
@@ -42,6 +48,7 @@ module.exports = api => {
           targets: {
             browsers: '>1%, not dead, not ie 11, not op_mini all'
           },
+          exclude: ['transform-async-to-generator', 'transform-regenerator'],
           loose: true,
           modules: false,
           useBuiltIns: 'usage',
@@ -53,12 +60,25 @@ module.exports = api => {
       '@babel/preset-react'
     ].filter(Boolean),
     plugins: [
-      (isClientDev || isClientProd) && '@babel/plugin-syntax-dynamic-import',
+      // Server
       (isServerDev || isServerProd || isTest) &&
         'babel-plugin-dynamic-import-node',
+
+      // Client
+      (isClientDev || isClientProd) && '@babel/plugin-syntax-dynamic-import',
+
+      // All plguins
       ['@babel/plugin-proposal-class-properties', { loose: true }],
       ['@babel/plugin-proposal-nullish-coalescing-operator', { loose: true }],
-      ['@babel/plugin-proposal-optional-chaining', { loose: true }]
+      ['@babel/plugin-proposal-optional-chaining', { loose: true }],
+
+      // Client Prod
+      isClientProd && [
+        'module:fast-async',
+        {
+          spec: true
+        }
+      ]
     ].filter(Boolean)
   }
 }

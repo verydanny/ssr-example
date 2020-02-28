@@ -1,25 +1,26 @@
 import React from 'react'
 import { renderToString } from 'react-dom/server'
 import { StaticRouter } from 'react-router'
+import { html } from 'common-tags'
+
 import App from '../../app/containers/app'
-import { AsyncChunkProvider } from '../../lib/async/asyncProvider'
+import { AsyncChunkContext } from '../../lib/async/asyncContext'
+import { AsyncChunkManager } from '../../lib/async/asyncChunkManager'
 import { AssetContext } from '../../lib/asset/assetContext'
 import { AssetManager } from '../../lib/asset/assetManager'
 import { HydrationManager, HydrationContext } from '../../lib/partial-hydrate'
 import { posts } from '../../data/random-posts'
 
-import { Response, Request, NextFunction } from 'express'
+import { Response, Request } from 'express'
 
 interface EntryPoint {
   js: string[]
   css: string[]
 }
 
-export const serverRenderer = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+const svgMap: string[] = []
+
+export const serverRenderer = (req: Request, res: Response) => {
   const { stats: serverStats } = res.locals.serverStats
   const {
     publicPath,
@@ -27,7 +28,7 @@ export const serverRenderer = (
     stats: clientStats,
     rawStats
   } = res.locals.clientStats
-  const entrypoint: EntryPoint = entry.main
+  const entrypoint: EntryPoint = entry.app
   const chunkJS: string[] = []
   const chunkCSS: string[] = []
   const hotUpdateRegex = (file: string) => !/.*\.hot-update.*\.js$/.test(file)
@@ -66,25 +67,27 @@ export const serverRenderer = (
   }
 
   const assetManager = new AssetManager()
-  const svgMap = new Set()
+  const asyncChunkManager = new AsyncChunkManager()
 
-  assetManager.logAssets(function(assetKey: string, assetValue: any) {
-    svgMap.add(assetValue.content)
+  assetManager.logAssets((assetKey: string, assetValue: any) => {
+    svgMap.push(assetValue.content)
   })
+
+  asyncChunkManager.recordAssetsCallback(sortModules)
 
   const body = renderToString(
     <StaticRouter location={req.url} context={context}>
-      <AssetContext.Provider value={assetManager}>
-        <AsyncChunkProvider updateChunk={sortModules}>
-          <HydrationContext.Provider value={hydrationManager}>
+      <AsyncChunkContext.Provider value={asyncChunkManager}>
+        <HydrationContext.Provider value={hydrationManager}>
+          <AssetContext.Provider value={assetManager}>
             <App context={posts} />
-          </HydrationContext.Provider>
-        </AsyncChunkProvider>
-      </AssetContext.Provider>
+          </AssetContext.Provider>
+        </HydrationContext.Provider>
+      </AsyncChunkContext.Provider>
     </StaticRouter>
   )
 
-  res.status(200).send(`
+  const app = `
     <!DOCTYPE html>
     <html>
       <head>
@@ -106,30 +109,34 @@ export const serverRenderer = (
       </head>
       <h1>Edit some middleware maybe</h1>
       <body>
-        <svg style="display:none;">${Array.from(svgMap)
-          .map(svg => svg)
-          .join('')}</svg>
+        ${
+          svgMap.length > 0
+            ? `<svg style="visibility:hidden;width:0;height:0;position:absolute;">${Array.from(
+                new Set(svgMap)
+              ).join('')}</svg>`
+            : ''
+        }
         <div class="app-root">${body}</div>
         ${Array.from(new Set(chunkJS))
           .map(
             chunk =>
-              `<script type="application/javascript" src="${publicPath}${String(
+              `<script async type="application/javascript" src="${publicPath}${String(
                 chunk
-              )}" async></script>`
+              )}"></script>`
           )
           .join('')}
         ${entrypoint.js
           .filter(hotUpdateRegex)
           .map(
             (chunk: string) =>
-              `<script type="application/javascript" src="${publicPath}${String(
+              `<script async type="application/javascript" src="${publicPath}${String(
                 chunk
-              )}" async></script>`
+              )}"></script>`
           )
           .join('')}
       </body>
     </html>
-  `)
+  `
 
-  next()
+  res.status(200).send(app)
 }

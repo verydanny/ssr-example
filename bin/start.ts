@@ -23,6 +23,8 @@ const serverStats = JSON.parse(
 
 const { publicPath } = clientStats
 
+app.use(publicPath, expressGzip(path.resolve(__dirname, '../dist/client'), {}))
+
 app.use(
   (
     _req: express.Request,
@@ -37,8 +39,6 @@ app.use(
 )
 
 app.use(composed)
-
-app.use(publicPath, expressGzip(path.resolve(__dirname, '../dist/client'), {}))
 
 preloadAll().then(() => {
   const bottomsep = '═'

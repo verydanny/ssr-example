@@ -8,7 +8,9 @@ export const HelloWorld = ({ name }: { name: string }) => (
     </p>
     <p className={style.bigBlue}>
       I&apos;m not being <strong>hydrated</strong> because server already did
-      that work
+      that works
     </p>
   </div>
 )
+
+HelloWorld.displayName = 'HelloWorld'

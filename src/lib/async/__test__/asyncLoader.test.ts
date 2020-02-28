@@ -1,20 +1,18 @@
-import {
-  createLoader,
-  allAsyncChunks,
-  allProcessedChunks,
-  preloadAll,
-  preloadReady
-} from '../asyncLoader'
+import { createLoader, preloadAll, preloadReady } from '../asyncLoader'
+import { PrivateModuleCache } from '../asyncCache'
 
 const mockModuleDefaultExport = jest.fn(x => `Hello ${x}`)
-const mockRequire = jest.fn(() => {})
+const mockRequire = jest.fn(() => {
+  // void
+})
 
 jest.mock('./dynamicImportMockOne', () => mockModuleDefaultExport)
 jest.mock('./dynamicImportMockTwo', () => mockModuleDefaultExport)
+jest.mock('./dynamicImportMockThree', () => null)
 
 beforeEach(() => {
-  allAsyncChunks.clear()
-  allProcessedChunks.clear()
+  PrivateModuleCache.clearAllAsyncModules
+  PrivateModuleCache.clearParsedModules
 
   const dynamicImportMockOneId = require.resolve('./dynamicImportMockOne')
   const dynamicImportMockTwoId = require.resolve('./dynamicImportMockTwo')
@@ -58,6 +56,19 @@ describe('createLoader', () => {
 
       expect(mockModuleDefaultExport).toHaveBeenCalled()
     })
+
+    test('CreateLoader<T> attempts to resolve a null import', async () => {
+      const loaderState = createLoader(
+        // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+        // @ts-ignore
+        () => import('./dynamicImportMockThree'),
+        () => require.resolve('./dynamicImportMockThree')
+      )
+
+      await loaderState.resolve()
+
+      expect(loaderState.resolved).toBe(null)
+    })
   })
 
   describe('Improper ID function (not a resolver, just a string/number)', () => {
@@ -67,9 +78,7 @@ describe('createLoader', () => {
         () => 'NOOP'
       )
 
-      expect(
-        typeof loaderState.resolved === 'undefined' && loaderState.attemptSync
-      ).toBe(true)
+      expect(loaderState.resolved == null && loaderState.attemptSync).toBe(true)
     })
 
     test('CreateLoader<T>.resolve is a Promise', () => {
@@ -170,7 +179,7 @@ describe('createLoader', () => {
         () => require.resolveWeak('./dynamicImportMockOne')
       )
 
-      expect(loaderStateTwo.resolved).toEqual(mockModuleDefaultExport)
+      expect(loaderStateTwo.resolved).toEqual(loaderStateOne.resolved)
     })
   })
 
@@ -185,8 +194,11 @@ describe('createLoader', () => {
         () => require.resolve('./dynamicImportMockTwo')
       )
 
-      expect(allAsyncChunks.size).toBe(2)
-      expect(allProcessedChunks.size).toBe(0)
+      const allAsyncModules = PrivateModuleCache.getAllAsyncModules
+      const parsedAsyncModules = PrivateModuleCache.getParsedModules
+
+      expect(allAsyncModules.size).toBe(2)
+      expect(parsedAsyncModules.size).toBe(0)
     })
 
     test('preloadAll resolves all undefined resolved', async () => {
@@ -199,10 +211,12 @@ describe('createLoader', () => {
         () => require.resolve('./dynamicImportMockTwo')
       )
 
+      const allAsyncModules = PrivateModuleCache.getAllAsyncModules
+
       await preloadAll()
 
       expect(
-        Array.from(allAsyncChunks).every(
+        Array.from(allAsyncModules).every(
           ([, loaderState]) => typeof loaderState.resolved !== 'undefined'
         )
       ).toBe(true)
@@ -214,9 +228,6 @@ describe('createLoader', () => {
       const id = require.resolve('./dynamicImportMockOne')
 
       global.__webpack_require__ = mockRequire
-
-      // Only 1 module is technically ready, so we should see 2 async modules
-      // in allAsyncChunk, and 1 async module in allProcessedChunks
       global.__webpack_modules__ = {
         [id]: require(id)
       }
@@ -241,8 +252,11 @@ describe('createLoader', () => {
         () => require.resolveWeak('./dynamicImportMockTwo')
       )
 
-      expect(allAsyncChunks.size).toBe(2)
-      expect(allProcessedChunks.size).toBe(1)
+      const allAsyncModules = PrivateModuleCache.getAllAsyncModules
+      const parsedAsyncModules = PrivateModuleCache.getParsedModules
+
+      expect(allAsyncModules.size).toBe(2)
+      expect(parsedAsyncModules.size).toBe(1)
     })
 
     test('preloadReady flushes ready modules', async () => {
@@ -255,10 +269,12 @@ describe('createLoader', () => {
         () => require.resolveWeak('./dynamicImportMockTwo')
       )
 
+      const parsedAsyncModules = PrivateModuleCache.getParsedModules
+
       await preloadReady()
 
       expect(
-        Array.from(allProcessedChunks).every(
+        Array.from(parsedAsyncModules).every(
           ([, loaderState]) => typeof loaderState.resolved !== 'undefined'
         )
       ).toBe(true)
@@ -274,16 +290,19 @@ describe('createLoader', () => {
         () => require.resolveWeak('./dynamicImportMockTwo')
       )
 
+      const allAsyncModules = PrivateModuleCache.getAllAsyncModules
+      const parsedAsyncModules = PrivateModuleCache.getParsedModules
+
       await preloadReady()
       await preloadAll()
 
       expect(
-        Array.from(allAsyncChunks).every(
+        Array.from(allAsyncModules).every(
           ([, loaderState]) => typeof loaderState.resolved !== 'undefined'
         )
       ).toBe(true)
       expect(
-        Array.from(allProcessedChunks).every(
+        Array.from(parsedAsyncModules).every(
           ([, loaderState]) => typeof loaderState.resolved !== 'undefined'
         )
       ).toBe(true)

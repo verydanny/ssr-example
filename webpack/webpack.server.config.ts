@@ -10,6 +10,7 @@ export const serverConfig = (env: WebpackConfig) => {
 
   return {
     entry: './src/server/entry.ts',
+    devtool: _dev_ ? 'inline-cheap-module-source-map' : 'source-map',
     output: {
       path: resolve(path, 'server/'),
       filename: `${target}.js`,

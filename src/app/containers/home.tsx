@@ -21,3 +21,5 @@ export const Home = ({ name }: HomeProps) => {
     </>
   )
 }
+
+Home.displayName = 'Home'

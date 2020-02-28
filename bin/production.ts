@@ -67,4 +67,8 @@ compiler
       )
     }
   })
-  .catch(e => console.log(e))
+  .catch(e => {
+    if (e.stats) {
+      console.log(e.stats.toString(defaultStatsOptions))
+    }
+  })

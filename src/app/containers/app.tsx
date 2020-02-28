@@ -13,4 +13,6 @@ const App = ({ context }: AppProps) => {
   )
 }
 
+App.displayName = 'App'
+
 export default App

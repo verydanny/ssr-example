@@ -10,7 +10,7 @@ export class AssetManager {
     }
 
     if (this.assetCallback) {
-      this.assetCallback(assetKey, assetValue, this)
+      this.assetCallback(assetKey, assetValue)
     }
 
     return assetValue
@@ -22,7 +22,13 @@ export class AssetManager {
 
   getAsset(assetKey: string) {
     if (this.hasAsset(assetKey)) {
-      return this[storage].get(assetKey)
+      const asset = this[storage].get(assetKey)
+
+      if (this.assetCallback) {
+        this.assetCallback(assetKey, asset)
+      }
+
+      return asset
     }
   }
 

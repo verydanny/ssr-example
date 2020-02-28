@@ -29,7 +29,11 @@ export const Hydrator = React.memo(function Hydrator<T>({
   if (!children && !currentHydration && componentRef) {
     const { Component, props } = componentRef
 
-    return <Component {...props} />
+    return (
+      <span {...hydrationProps}>
+        <Component {...props} />
+      </span>
+    )
   }
 
   return (
@@ -45,7 +49,7 @@ export const Hydrator = React.memo(function Hydrator<T>({
 Hydrator.displayName = 'Hydrator'
 
 export function StaticContent<Props>(Component: React.ComponentType<Props>) {
-  return function StaticContentWrap(props: Props) {
+  function StaticContentWrap(props: Props) {
     const C: any = Component
 
     return isServer ? (
@@ -61,4 +65,8 @@ export function StaticContent<Props>(Component: React.ComponentType<Props>) {
       />
     )
   }
+
+  StaticContentWrap.displayName = 'StaticContentHOC'
+
+  return React.memo(StaticContentWrap)
 }

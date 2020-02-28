@@ -1,40 +1,12 @@
-export type DynamicImport<T> = T | { default: T }
+import { PrivateModuleCache } from './asyncCache'
 
-export interface CreateLoader<T> {
-  id?: string | number
-  attemptSync: boolean
-  resolved: undefined | T
-  resolve: () => Promise<T | null>
-}
+import { DynamicImport, CreateLoader } from './types'
 
 declare const __webpack_require__: <T>(id: string | number) => DynamicImport<T>
 declare const __webpack_modules__: {
   [key: string]: typeof import('webpack').compilation['Module']
 }
 
-export const allAsyncChunks: Map<
-  string | number,
-  CreateLoader<unknown>
-> = new Map()
-export const allProcessedChunks: Map<
-  string | number,
-  CreateLoader<unknown>
-> = new Map()
-
-/**
- * This is for jest and regular node. If not working in a webpack
- * environment, you can resolve using Node's `require.resolve`.
- *
- *  Example:
- *    const loaderState = createLoader(
- *      () => import('./foo'),
- *      () => require.resolve('./foo')
- *    )
- *
- * Then node can require it using CJS `require`. The issue is that
- * webpack automatically bundles the module when one uses `require`.
- * 
- */
 const requireKey = 'require'
 const nodeRequire =
   (typeof global === 'object' &&
@@ -53,7 +25,7 @@ export function createLoader<T>(
   load: () => Promise<DynamicImport<T>>,
   id: () => string | number
 ): CreateLoader<T> {
-  let moduleId
+  let moduleId = id && id()
 
   try {
     moduleId = id && id()
@@ -64,9 +36,9 @@ export function createLoader<T>(
   const loaderState: CreateLoader<T> = {
     attemptSync: false,
     id: moduleId,
-    resolved: undefined,
+    resolved: null,
     async resolve() {
-      const loaded = normalize(await resolver(load))
+      const loaded = await resolver(load)
 
       if (loaded) {
         this.resolved = loaded
@@ -76,15 +48,28 @@ export function createLoader<T>(
     }
   }
 
-  if (loaderState.id) {
-    const cacheAllResolved = cacheAllAsync(loaderState)
-    const cacheReadyResolved = cacheReadyAsync(loaderState)
+  // Caching modules messes up hot reloading
+  if (!module.hot) {
+    if (loaderState.id) {
+      if (isModuleReady(loaderState.id)) {
+        const parsedAsyncModuleCached = PrivateModuleCache.cacheParsedAsyncModule(
+          loaderState.id,
+          loaderState
+        )
 
-    if (cacheAllResolved || cacheReadyResolved) {
-      return (
-        (cacheAllResolved as CreateLoader<T>) ||
-        (cacheReadyResolved as CreateLoader<T>)
+        if (parsedAsyncModuleCached.resolved) {
+          return parsedAsyncModuleCached
+        }
+      }
+
+      const allAsyncModulesCached = PrivateModuleCache.cacheAsyncModule(
+        loaderState.id,
+        loaderState
       )
+
+      if (allAsyncModulesCached.resolved) {
+        return allAsyncModulesCached
+      }
     }
   }
 
@@ -95,7 +80,9 @@ export function createLoader<T>(
     const resolved = attemptSyncImport(loaderState.id)
 
     if (resolved) {
-      loaderState.resolved = normalize(resolved)
+      // Hard to type this one since we're using library module things like
+      // webpack's require, or node's require. Hard to type
+      loaderState.resolved = (resolved as unknown) as T
 
       return loaderState
     }
@@ -104,56 +91,16 @@ export function createLoader<T>(
   return loaderState
 }
 
-function cacheReadyAsync<T>(
-  loaderState: CreateLoader<T>
-): CreateLoader<unknown> | undefined {
-  const id = loaderState.id
-
-  if (id && isModuleReady(id)) {
-    const cached = allProcessedChunks.has(id)
-      ? allProcessedChunks.get(id)
-      : undefined
-
-    if (typeof cached?.resolved !== 'undefined') {
-      return cached
-    }
-
-    allProcessedChunks.set(id, loaderState)
-  }
-
-  return undefined
-}
-
-function cacheAllAsync<T>(
-  loaderState: CreateLoader<T>
-): CreateLoader<unknown> | undefined {
-  const id = loaderState.id
-
-  if (id) {
-    const allCached = allAsyncChunks.has(id)
-      ? allAsyncChunks.get(id)
-      : undefined
-
-    if (typeof allCached?.resolved !== 'undefined') {
-      return allCached
-    }
-
-    allAsyncChunks.set(id, loaderState)
-  }
-
-  return undefined
-}
-
-function resolver<T>(
+async function resolver<T>(
   load: () => Promise<DynamicImport<T>>
-): Promise<DynamicImport<T>> {
-  return load().then(mod => mod)
+): Promise<T | null> {
+  const loaded = await load()
+
+  return normalize(loaded)
 }
 
 export function normalize<T>(asyncModule: DynamicImport<T | null>): T | null {
-  if (asyncModule == null) {
-    return null
-  }
+  if (asyncModule == null) return null
 
   const value =
     typeof asyncModule === 'object' && 'default' in asyncModule
@@ -163,14 +110,16 @@ export function normalize<T>(asyncModule: DynamicImport<T | null>): T | null {
   return value == null ? null : value
 }
 
-export function attemptSyncImport(id: string | number): DynamicImport<any> {
+export function attemptSyncImport(
+  id: string | number
+): typeof normalize | undefined | null {
   if (
     typeof __webpack_require__ === 'function' &&
     typeof __webpack_modules__ === 'object' &&
     __webpack_modules__[id]
   ) {
     try {
-      return __webpack_require__(id)
+      return normalize(__webpack_require__(id))
     } catch {
       // SILENTLY FAIL
       //
@@ -181,11 +130,13 @@ export function attemptSyncImport(id: string | number): DynamicImport<any> {
 
   if (typeof nodeRequire === 'function') {
     try {
-      return nodeRequire(id)
+      return normalize(nodeRequire(id))
     } catch {
       // SILENTYLY FAIL
     }
   }
+
+  return undefined
 }
 
 export function isModuleReady(id: string | number) {
@@ -213,7 +164,7 @@ function flushInitializers<T>(
    */
   for (const [, loaderState] of initializers) {
     if (
-      typeof loaderState.resolved === 'undefined' &&
+      loaderState.resolved == null &&
       typeof loaderState.resolve === 'function'
     ) {
       promises.unshift(loaderState.resolve())
@@ -228,7 +179,7 @@ function flushInitializers<T>(
     const unresolved = []
 
     for (const [key, loaderState] of initializers) {
-      if (typeof loaderState.resolved === 'undefined') {
+      if (loaderState.resolved == null) {
         unresolved.push(key)
       }
     }
@@ -243,12 +194,18 @@ function flushInitializers<T>(
 
 export const preloadAll = () =>
   new Promise((resolve, reject) =>
-    flushInitializers(allAsyncChunks).then(resolve, reject)
+    flushInitializers(PrivateModuleCache.getAllAsyncModules).then(
+      resolve,
+      reject
+    )
   )
 
 export const preloadReady = () =>
   new Promise(resolve =>
     // we want it resolving even if chunks aren't downloaded properly
     // in SSR. If we don't then it'll fail to render the app.
-    flushInitializers(allProcessedChunks).then(resolve, resolve)
+    flushInitializers(PrivateModuleCache.getParsedModules).then(
+      resolve,
+      resolve
+    )
   )

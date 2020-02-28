@@ -11,14 +11,16 @@ export const clientConfig = (env: WebpackConfig) => {
   const _prod_ = mode === 'production'
 
   return {
-    name: target,
-    entry: [
-      _dev_ && 'webpack-hot-middleware/client?reload=true&noInfo=true',
-      './src/client/entry.tsx'
-    ].filter(Boolean),
+    devtool: _dev_ ? 'cheap-module-eval-source-map' : 'source-map',
+    entry: {
+      app: [
+        _dev_ && 'webpack-hot-middleware/client?reload=true&noInfo=true',
+        './src/client/entry.tsx'
+      ].filter(Boolean)
+    },
     output: {
       path: resolve(path, 'client/'),
-      filename: _prod_ ? `${target}.[hash].js` : `${target}.js`,
+      filename: _prod_ ? `[name].[hash].js` : `[name].js`,
       publicPath: '/assets/',
       chunkFilename: _prod_ ? '[name].[id].[hash].js' : '[name].[id].js',
       pathinfo: _prod_,
@@ -26,9 +28,14 @@ export const clientConfig = (env: WebpackConfig) => {
       hotUpdateChunkFilename: '[id].hot-update.js'
     },
     optimization: {
+      namedChunks: false,
+      namedModules: false,
       removeEmptyChunks: _prod_,
       mergeDuplicateChunks: _prod_,
       providedExports: _prod_,
+      runtimeChunk: {
+        name: 'runtime'
+      },
       splitChunks: _prod_
         ? {
             chunks: 'all',

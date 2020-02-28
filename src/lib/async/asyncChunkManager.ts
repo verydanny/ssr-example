@@ -3,9 +3,17 @@ export type ModuleIdFunc = string | number
 export type UpdateChunk = (id: ModuleIdFunc, isStatic: boolean) => void
 
 export class AsyncChunkManager {
-  recordChunk: UpdateChunk
+  private recordCallback?: Function
 
-  constructor(updateChunk: UpdateChunk) {
-    this.recordChunk = updateChunk
+  recordChunk(id: ModuleIdFunc, isStatic: boolean) {
+    if (this.recordCallback) {
+      this.recordCallback(id, isStatic)
+    }
+  }
+
+  recordAssetsCallback<T extends Function>(fn: T) {
+    if (!this.recordCallback) {
+      this.recordCallback = fn.bind(this)
+    }
   }
 }
