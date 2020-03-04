@@ -6,14 +6,12 @@ export class AsyncChunkManager {
   private recordCallback?: Function
 
   recordChunk(id: ModuleIdFunc, isStatic: boolean) {
-    if (this.recordCallback) {
-      this.recordCallback(id, isStatic)
-    }
+    return this.recordCallback && this.recordCallback(id, isStatic)
   }
 
   recordAssetsCallback<T extends Function>(fn: T) {
     if (!this.recordCallback) {
-      this.recordCallback = fn.bind(this)
+      this.recordCallback = fn
     }
   }
 }

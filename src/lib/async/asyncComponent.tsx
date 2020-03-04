@@ -4,7 +4,7 @@ import { createLoader } from './asyncLoader'
 import { useAsyncHook } from './asyncHooks'
 import { DynamicImport } from './types'
 
-type GetProps<T> = T extends React.ComponentType<infer P> ? P : never
+export type GetProps<T> = T extends React.ComponentType<infer P> ? P : never
 
 interface AsyncComponentOptions<ExportKeys, Props> {
   Loading?(props: Props): React.ReactNode

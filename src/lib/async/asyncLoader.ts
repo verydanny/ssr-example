@@ -49,27 +49,25 @@ export function createLoader<T>(
   }
 
   // Caching modules messes up hot reloading
-  if (!module.hot) {
-    if (loaderState.id) {
-      if (isModuleReady(loaderState.id)) {
-        const parsedAsyncModuleCached = PrivateModuleCache.cacheParsedAsyncModule(
-          loaderState.id,
-          loaderState
-        )
-
-        if (parsedAsyncModuleCached.resolved) {
-          return parsedAsyncModuleCached
-        }
-      }
-
-      const allAsyncModulesCached = PrivateModuleCache.cacheAsyncModule(
+  if (!module.hot && loaderState.id) {
+    if (isModuleReady(loaderState.id)) {
+      const parsedAsyncModuleCached = PrivateModuleCache.cacheParsedAsyncModule(
         loaderState.id,
         loaderState
       )
 
-      if (allAsyncModulesCached.resolved) {
-        return allAsyncModulesCached
+      if (parsedAsyncModuleCached.resolved) {
+        return parsedAsyncModuleCached
       }
+    }
+
+    const allAsyncModulesCached = PrivateModuleCache.cacheAsyncModule(
+      loaderState.id,
+      loaderState
+    )
+
+    if (allAsyncModulesCached.resolved) {
+      return allAsyncModulesCached
     }
   }
 

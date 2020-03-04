@@ -6,7 +6,7 @@ import CompressionPlugin from 'compression-webpack-plugin'
 import { WebpackConfig } from '../types/webpack-config'
 
 export const clientConfig = (env: WebpackConfig) => {
-  const { path, mode, target } = env
+  const { path, mode } = env
   const _dev_ = mode === 'development'
   const _prod_ = mode === 'production'
 

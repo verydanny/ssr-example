@@ -3,6 +3,8 @@ import { useHydrationManager } from './hooks'
 import { makeAsyncComponent } from '../async/asyncComponent'
 import { AsyncChunkContext } from '../async/asyncContext'
 
+import { GetProps } from '../async/asyncComponent'
+
 type DefaultOrNamedExport =
   | {
       readonly [x: string]: any
@@ -14,18 +16,21 @@ type ResolvedPromise<T extends DefaultOrNamedExport> = {
 }
 
 interface DeferredComponentProps {
+  children: React.ReactChild
   resolver?: () => string | number
 }
 
-export const DeferredComponent: React.FunctionComponent<
-  DeferredComponentProps
-> = ({ children, resolver }) => {
+export function DeferredComponent({
+  children,
+  resolver
+}: DeferredComponentProps) {
   const manager = useHydrationManager()
   const [hydrated, setHydrated] = useState(manager.hydrated)
 
   if (resolver) {
-    const { updateChunk } = useContext(AsyncChunkContext)
-    updateChunk(resolver, false)
+    const { recordChunk } = useContext(AsyncChunkContext)
+
+    recordChunk(resolver(), false)
   }
 
   useEffect(() => setHydrated(manager.hydrated), [manager])
@@ -34,18 +39,13 @@ export const DeferredComponent: React.FunctionComponent<
 }
 
 export function DeferHydrateToClient<
-  Props,
-  T extends React.ComponentType<Props>
->(
-  Component: T,
-  resolver?: () => string | number
-): React.MemoExoticComponent<React.ComponentType<Props>> {
-  const C: any = Component
-
+  T extends React.ComponentType<GetProps<T>>,
+  Props extends GetProps<T>
+>(Component: T, resolver?: () => string | number) {
   function DeferredComponentHOC(props: Props) {
     return (
       <DeferredComponent resolver={resolver ? resolver : undefined}>
-        <C {...props} />
+        <Component {...props} />
       </DeferredComponent>
     )
   }
@@ -67,13 +67,10 @@ export function importClientDeferred<
   exportName: K | 'default'
   isStatic?: boolean
 }) {
-  return DeferHydrateToClient(
-    makeAsyncComponent({
-      importComponent,
-      webpack,
-      exportName,
-      isStatic
-    }),
-    webpack
-  )
+  const C = makeAsyncComponent(importComponent, webpack, {
+    exportName,
+    isStatic
+  })
+
+  return DeferHydrateToClient(C, webpack)
 }

@@ -1,7 +1,6 @@
 import React from 'react'
 import { renderToString } from 'react-dom/server'
 import { StaticRouter } from 'react-router'
-import { html } from 'common-tags'
 
 import App from '../../app/containers/app'
 import { AsyncChunkContext } from '../../lib/async/asyncContext'
